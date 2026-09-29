@@ -12,6 +12,7 @@ import {
   ActivityLogItem,
   TaskStatus,
   ProjectStatus,
+  NotificationItem,
 } from '@/types';
 import {
   initialEmployees,
@@ -21,6 +22,7 @@ import {
   initialLeaveRequests,
   initialLeaveBalances,
   initialActivityLog,
+  initialNotifications,
 } from '@/data/seedData';
 
 interface AppContextType {
@@ -34,6 +36,8 @@ interface AppContextType {
   leaveRequests: LeaveRequest[];
   leaveBalances: Record<string, LeaveBalance>;
   activityLog: ActivityLogItem[];
+  notifications: NotificationItem[];
+  unreadNotificationsCount: number;
   
   // Actions
   addEmployee: (emp: Omit<Employee, 'id'>) => void;
@@ -47,10 +51,17 @@ interface AppContextType {
   addTask: (data: Omit<Task, 'id' | 'comments' | 'history'>) => void;
   updateTaskStatus: (taskId: string, status: TaskStatus) => void;
   addTaskComment: (taskId: string, text: string) => void;
+  markAsRead: (id: string) => void;
+  markAsUnread: (id: string) => void;
+  markAllAsRead: () => void;
+  deleteNotification: (id: string) => void;
+  clearAllNotifications: () => void;
+  addNotification: (item: Omit<NotificationItem, 'id' | 'timestamp' | 'read'>) => void;
   resetAllData: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
+
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [currentRole, setCurrentRole] = useState<UserRole>('admin');
@@ -61,6 +72,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(initialLeaveRequests);
   const [leaveBalances, setLeaveBalances] = useState<Record<string, LeaveBalance>>(initialLeaveBalances);
   const [activityLog, setActivityLog] = useState<ActivityLogItem[]>(initialActivityLog);
+  const [notifications, setNotifications] = useState<NotificationItem[]>(initialNotifications);
 
   // Load from localStorage if present
   useEffect(() => {
@@ -83,10 +95,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (savedBalances) setLeaveBalances(JSON.parse(savedBalances));
       const savedLogs = localStorage.getItem('ayipm_activity');
       if (savedLogs) setActivityLog(JSON.parse(savedLogs));
+      const savedNotifs = localStorage.getItem('ayipm_notifications');
+      if (savedNotifs) setNotifications(JSON.parse(savedNotifs));
     } catch {
       // ignore
     }
   }, []);
+
 
   // Save changes to localStorage
   const saveState = (key: string, data: unknown) => {
@@ -136,6 +151,60 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return updated;
     });
   };
+
+  const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
+
+  const markAsRead = (id: string) => {
+    setNotifications((prev) => {
+      const updated = prev.map((n) => (n.id === id ? { ...n, read: true } : n));
+      saveState('ayipm_notifications', updated);
+      return updated;
+    });
+  };
+
+  const markAsUnread = (id: string) => {
+    setNotifications((prev) => {
+      const updated = prev.map((n) => (n.id === id ? { ...n, read: false } : n));
+      saveState('ayipm_notifications', updated);
+      return updated;
+    });
+  };
+
+  const markAllAsRead = () => {
+    setNotifications((prev) => {
+      const updated = prev.map((n) => ({ ...n, read: true }));
+      saveState('ayipm_notifications', updated);
+      return updated;
+    });
+  };
+
+  const deleteNotification = (id: string) => {
+    setNotifications((prev) => {
+      const updated = prev.filter((n) => n.id !== id);
+      saveState('ayipm_notifications', updated);
+      return updated;
+    });
+  };
+
+  const clearAllNotifications = () => {
+    setNotifications([]);
+    saveState('ayipm_notifications', []);
+  };
+
+  const addNotification = (item: Omit<NotificationItem, 'id' | 'timestamp' | 'read'>) => {
+    const newNotif: NotificationItem = {
+      ...item,
+      id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      timestamp: new Date().toISOString(),
+      read: false,
+    };
+    setNotifications((prev) => {
+      const updated = [newNotif, ...prev];
+      saveState('ayipm_notifications', updated);
+      return updated;
+    });
+  };
+
 
   const addEmployee = (empData: Omit<Employee, 'id'>) => {
     const newEmp: Employee = {
@@ -222,6 +291,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
 
     logActivity('Attendance Check-In', 'attendance', emp.name, `Recorded check-in at ${timeStr} (${status})`);
+    if (isLate) {
+      addNotification({
+        title: 'Late Attendance Alert',
+        message: `${emp.name} checked in at ${timeStr} (after 09:15 grace window)`,
+        category: 'attendance',
+        link: '/attendance',
+        priority: 'normal',
+      });
+    }
   };
 
   const checkOut = (targetId?: string) => {
@@ -283,7 +361,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       `${emp.name} (${data.days}d ${data.leaveType})`,
       `Dates: ${data.startDate} to ${data.endDate}`
     );
+
+    addNotification({
+      title: 'New Leave Request',
+      message: `${emp.name} submitted a ${data.days}-day ${data.leaveType} leave request.`,
+      category: 'leave',
+      link: '/leave',
+      priority: 'high',
+      sender: { name: emp.name },
+    });
   };
+
 
   const reviewLeaveRequest = (
     id: string,
@@ -363,8 +451,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         `${affectedReq.employeeName} (${affectedReq.leaveType})`,
         status === 'rejected' ? `Reason: ${reason}` : 'Leave balance and calendar updated'
       );
+
+      addNotification({
+        title: `Leave ${status === 'approved' ? 'Approved' : 'Rejected'}`,
+        message: `${affectedReq.employeeName}'s ${affectedReq.days}d ${affectedReq.leaveType} leave was ${status}.`,
+        category: 'leave',
+        link: '/leave',
+        priority: status === 'approved' ? 'normal' : 'high',
+      });
     }
   };
+
 
   const addProject = (data: Omit<Project, 'id' | 'progress'>) => {
     const newProj: Project = {
@@ -418,6 +515,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return updated;
     });
     logActivity('Created Task', 'task', newTask.title, `Assigned to ${newTask.assigneeName}`);
+    addNotification({
+      title: 'New Task Created',
+      message: `"${newTask.title}" was assigned to ${newTask.assigneeName}.`,
+      category: 'task',
+      link: '/tasks',
+      priority: newTask.priority === 'urgent' ? 'urgent' : newTask.priority === 'high' ? 'high' : 'normal',
+      sender: { name: currentUser.name, avatar: currentUser.avatar },
+    });
   };
 
   const updateTaskStatus = (taskId: string, status: TaskStatus) => {
@@ -443,6 +548,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const targetTask = tasks.find((t) => t.id === taskId);
     if (targetTask) {
       logActivity('Moved Task', 'task', targetTask.title, `Moved to ${status.replace('_', ' ')}`);
+      addNotification({
+        title: 'Task Status Updated',
+        message: `"${targetTask.title}" moved to ${status.replace('_', ' ')}.`,
+        category: 'task',
+        link: '/tasks',
+        priority: 'normal',
+      });
     }
   };
 
@@ -475,6 +587,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setLeaveRequests(initialLeaveRequests);
     setLeaveBalances(initialLeaveBalances);
     setActivityLog(initialActivityLog);
+    setNotifications(initialNotifications);
     setCurrentRole('admin');
   };
 
@@ -491,6 +604,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         leaveRequests,
         leaveBalances,
         activityLog,
+        notifications,
+        unreadNotificationsCount,
         addEmployee,
         toggleEmployeeStatus,
         checkIn,
@@ -502,12 +617,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addTask,
         updateTaskStatus,
         addTaskComment,
+        markAsRead,
+        markAsUnread,
+        markAllAsRead,
+        deleteNotification,
+        clearAllNotifications,
+        addNotification,
         resetAllData,
       }}
     >
       {children}
     </AppContext.Provider>
   );
+
 }
 
 export function useApp() {

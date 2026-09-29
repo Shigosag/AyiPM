@@ -296,6 +296,95 @@ html, body {
   color: var(--text-muted);
 }
 
+/* Theme-related Bended Edges Search Bar */
+.search-bar-bended {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: #ffffff;
+  border: 1.5px solid var(--border-medium);
+  border-radius: var(--radius-full);
+  padding: 0.25rem 0.65rem 0.25rem 1rem;
+  transition: all var(--transition-normal);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.search-bar-bended:hover {
+  border-color: var(--primary);
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08);
+}
+
+.search-bar-bended:focus-within {
+  border-color: var(--primary);
+  background: #ffffff;
+  box-shadow: 0 0 0 3.5px var(--primary-glow), 0 3px 10px rgba(2, 132, 199, 0.12);
+}
+
+.search-bar-bended .search-icon {
+  color: var(--primary);
+  flex-shrink: 0;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.search-bar-bended:focus-within .search-icon {
+  transform: scale(1.08);
+}
+
+.search-bar-bended input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0.45rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  min-width: 0;
+}
+
+.search-bar-bended input::placeholder {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.search-bar-bended .search-clear-btn {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-right: 0.35rem;
+  transition: all var(--transition-fast);
+}
+
+.search-bar-bended .search-clear-btn:hover {
+  background: #e2e8f0;
+  color: var(--text-primary);
+}
+
+.search-bar-bended .kbd-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: #f1f5f9;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.15rem 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  user-select: none;
+}
+
+
 /* Badges & Pills */
 .badge {
   display: inline-flex;

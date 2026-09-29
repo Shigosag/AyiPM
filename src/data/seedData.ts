@@ -1,4 +1,4 @@
-import { Employee, Project, Task, AttendanceRecord, LeaveRequest, LeaveBalance, ActivityLogItem } from '@/types';
+import { Employee, Project, Task, AttendanceRecord, LeaveRequest, LeaveBalance, ActivityLogItem, NotificationItem } from '@/types';
 
 export const initialEmployees: Employee[] = [
   {
@@ -122,3 +122,64 @@ export const initialActivityLog: ActivityLogItem[] = [
     details: 'Status updated to Approved; Attendance marked as Leave.',
   },
 ];
+
+export const initialNotifications: NotificationItem[] = [
+  {
+    id: 'notif-1',
+    title: 'Task Review Requested',
+    message: 'Sarah Chen completed "Design 12-table relational schema & versioned migrations" and requested review.',
+    category: 'task',
+    timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 mins ago
+    read: false,
+    link: '/tasks',
+    priority: 'urgent',
+    sender: {
+      name: 'Sarah Chen',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+    },
+  },
+  {
+    id: 'notif-2',
+    title: 'New Leave Application',
+    message: 'Amina Nour applied for 2 days Sick Leave (Sep 21 - Sep 22) awaiting review.',
+    category: 'leave',
+    timestamp: new Date(Date.now() - 45 * 60 * 1000).toISOString(), // 45 mins ago
+    read: false,
+    link: '/leave',
+    priority: 'high',
+    sender: {
+      name: 'Amina Nour',
+    },
+  },
+  {
+    id: 'notif-3',
+    title: 'Late Attendance Recorded',
+    message: 'Sarah Chen checked in at 09:24 AM, outside the standard grace period window.',
+    category: 'attendance',
+    timestamp: new Date(Date.now() - 3 * 3600 * 1000).toISOString(), // 3 hours ago
+    read: false,
+    link: '/attendance',
+    priority: 'normal',
+  },
+  {
+    id: 'notif-4',
+    title: 'Sprint Milestone Achieved',
+    message: 'Project "AyiPM Core Platform" reached 68% completion milestone.',
+    category: 'system',
+    timestamp: new Date(Date.now() - 26 * 3600 * 1000).toISOString(), // Yesterday
+    read: true,
+    link: '/projects',
+    priority: 'normal',
+  },
+  {
+    id: 'notif-5',
+    title: 'System Preferences Synchronized',
+    message: 'Leave balance defaults and attendance policies were updated in Settings.',
+    category: 'system',
+    timestamp: new Date(Date.now() - 48 * 3600 * 1000).toISOString(), // 2 days ago
+    read: true,
+    link: '/settings',
+    priority: 'low',
+  },
+];
+

@@ -13,7 +13,9 @@ import {
   PlaneTakeoff,
   Clock,
   Sparkles,
+  X,
 } from 'lucide-react';
+
 
 export default function ActivityPage() {
   const { activityLog } = useApp();
@@ -73,21 +75,28 @@ export default function ActivityPage() {
           justifyContent: 'space-between',
         }}
       >
-        <div style={{ position: 'relative', flex: 1, minWidth: '260px' }}>
-          <Search
-            size={16}
-            color="var(--text-muted)"
-            style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
-          />
-          <input
-            type="text"
-            placeholder="Search audit actions, actors, or entity names..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="form-input"
-            style={{ paddingLeft: '2.25rem' }}
-          />
+        <div style={{ flex: 1, minWidth: '260px' }}>
+          <div className="search-bar-bended" style={{ height: '42px' }}>
+            <Search size={16} className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search audit actions, actors, or entity names..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {search && (
+              <button
+                type="button"
+                className="search-clear-btn"
+                onClick={() => setSearch('')}
+                title="Clear search"
+              >
+                <X size={12} />
+              </button>
+            )}
+          </div>
         </div>
+
 
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           {['all', 'attendance', 'leave', 'task', 'project', 'employee'].map((t) => (
