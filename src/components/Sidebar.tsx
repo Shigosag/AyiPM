@@ -13,6 +13,7 @@ import {
   FolderKanban,
   CheckSquare,
   Activity,
+  Settings,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
@@ -77,6 +78,12 @@ export default function Sidebar() {
       name: 'Activity Audit',
       href: '/activity',
       icon: Activity,
+      roles: ['admin', 'project_manager', 'employee'],
+    },
+    {
+      name: 'Settings',
+      href: '/settings',
+      icon: Settings,
       roles: ['admin', 'project_manager', 'employee'],
     },
   ];
