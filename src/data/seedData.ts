@@ -11,74 +11,9 @@ export const initialEmployees: Employee[] = [
     status: 'active',
     joinDate: '2023-01-15',
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
-    phone: '+1 (555) 234-5678',
-    location: 'San Francisco, CA',
+    phone: '',
+    location: '',
   },
-  {
-    id: 'emp-2',
-    name: 'Marcus Vance',
-    email: 'marcus.v@ayipm.io',
-    department: 'Engineering',
-    designation: 'Senior Backend Engineer & PM',
-    role: 'project_manager',
-    status: 'active',
-    joinDate: '2023-03-01',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    phone: '+1 (555) 876-5432',
-    location: 'New York, NY',
-  },
-  {
-    id: 'emp-3',
-    name: 'Elena Rostova',
-    email: 'elena.r@ayipm.io',
-    department: 'Engineering',
-    designation: 'Frontend Engineer',
-    role: 'employee',
-    status: 'active',
-    joinDate: '2023-06-20',
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
-    phone: '+1 (555) 345-6789',
-    location: 'Austin, TX',
-  },
-  {
-    id: 'emp-4',
-    name: 'David Kim',
-    email: 'david.kim@ayipm.io',
-    department: 'Engineering',
-    designation: 'Frontend & QA Lead',
-    role: 'employee',
-    status: 'active',
-    joinDate: '2023-08-10',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    phone: '+1 (555) 987-6543',
-    location: 'Seattle, WA',
-  },
-  {
-    id: 'emp-5',
-    name: 'Amina Nour',
-    email: 'amina.n@ayipm.io',
-    department: 'Product',
-    designation: 'Product Designer',
-    role: 'employee',
-    status: 'active',
-    joinDate: '2023-11-05',
-    avatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=150&auto=format&fit=crop&q=80',
-    phone: '+1 (555) 456-7890',
-    location: 'Chicago, IL',
-  },
-  {
-    id: 'emp-6',
-    name: 'Liam Gallagher',
-    email: 'liam.g@ayipm.io',
-    department: 'Operations',
-    designation: 'HR & People Ops Lead',
-    role: 'admin',
-    status: 'active',
-    joinDate: '2022-09-01',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    phone: '+1 (555) 654-3210',
-    location: 'Denver, CO',
-  }
 ];
 
 export const initialProjects: Project[] = [
@@ -94,42 +29,6 @@ export const initialProjects: Project[] = [
     members: ['emp-1', 'emp-2', 'emp-3', 'emp-4'],
     budget: '$85,000',
   },
-  {
-    id: 'proj-2',
-    name: 'Fintech Payment Engine',
-    client: 'Apex Global Financial',
-    description: 'High-throughput microservices architecture for multi-currency processing.',
-    startDate: '2026-08-15',
-    endDate: '2026-12-30',
-    status: 'in_progress',
-    progress: 45,
-    members: ['emp-1', 'emp-2', 'emp-5'],
-    budget: '$140,000',
-  },
-  {
-    id: 'proj-3',
-    name: 'Enterprise CRM Migration',
-    client: 'Vanguard Logistics',
-    description: 'Migrating legacy ERP spreadsheets to modern relational cloud tables.',
-    startDate: '2026-07-01',
-    endDate: '2026-10-15',
-    status: 'in_review',
-    progress: 92,
-    members: ['emp-2', 'emp-4'],
-    budget: '$62,000',
-  },
-  {
-    id: 'proj-4',
-    name: 'Mobile Client Architecture',
-    client: 'Internal R&D',
-    description: 'Design API contracts and schemas ready for post-MVP iOS & Android client.',
-    startDate: '2026-10-01',
-    endDate: '2027-01-20',
-    status: 'planning',
-    progress: 15,
-    members: ['emp-1', 'emp-3'],
-    budget: '$35,000',
-  }
 ];
 
 export const initialTasks: Task[] = [
@@ -159,109 +58,6 @@ export const initialTasks: Task[] = [
       { id: 'h-2', action: 'Moved to Done', author: 'Sarah Chen', timestamp: '2026-09-08 17:15' }
     ]
   },
-  {
-    id: 'task-102',
-    projectId: 'proj-1',
-    projectName: 'AyiPM Core Platform',
-    title: 'Implement Attendance check-in/out logic & status derivation',
-    description: 'Working hours calculation, grace period, late derivation, and monthly report aggregation.',
-    assigneeId: 'emp-2',
-    assigneeName: 'Marcus Vance',
-    assigneeAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    priority: 'high',
-    status: 'in_progress',
-    dueDate: '2026-09-24',
-    comments: [
-      {
-        id: 'c-2',
-        authorName: 'David Kim',
-        authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-        text: 'Added automated test cases covering half-day threshold boundary.',
-        timestamp: '2026-09-20 11:20',
-      }
-    ],
-    history: [
-      { id: 'h-3', action: 'Assigned to Marcus Vance', author: 'Sarah Chen', timestamp: '2026-09-12 10:00' },
-      { id: 'h-4', action: 'Moved to In Progress', author: 'Marcus Vance', timestamp: '2026-09-14 09:15' }
-    ]
-  },
-  {
-    id: 'task-103',
-    projectId: 'proj-1',
-    projectName: 'AyiPM Core Platform',
-    title: 'Interactive Kanban board with drag-drop and column transitions',
-    description: 'Ensure keyboard accessibility, touch support, and optimistic status updates with error rollback.',
-    assigneeId: 'emp-4',
-    assigneeName: 'David Kim',
-    assigneeAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    priority: 'urgent',
-    status: 'in_progress',
-    dueDate: '2026-09-26',
-    comments: [],
-    history: [
-      { id: 'h-5', action: 'Created task', author: 'Marcus Vance', timestamp: '2026-09-15 14:00' },
-      { id: 'h-6', action: 'Moved to In Progress', author: 'David Kim', timestamp: '2026-09-16 11:00' }
-    ]
-  },
-  {
-    id: 'task-104',
-    projectId: 'proj-1',
-    projectName: 'AyiPM Core Platform',
-    title: 'Build role-aware navigation shell & responsive layout',
-    description: 'Sidebar and top header that dynamically adjusts actions based on Admin, PM, or Employee permissions.',
-    assigneeId: 'emp-3',
-    assigneeName: 'Elena Rostova',
-    assigneeAvatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
-    priority: 'medium',
-    status: 'review',
-    dueDate: '2026-09-22',
-    comments: [
-      {
-        id: 'c-3',
-        authorName: 'Sarah Chen',
-        authorAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
-        text: 'Looks sleek! Verifying phone viewport navigation drawer.',
-        timestamp: '2026-09-21 10:00',
-      }
-    ],
-    history: [
-      { id: 'h-7', action: 'Moved to Review', author: 'Elena Rostova', timestamp: '2026-09-20 18:00' }
-    ]
-  },
-  {
-    id: 'task-105',
-    projectId: 'proj-2',
-    projectName: 'Fintech Payment Engine',
-    title: 'Multi-currency settlement reconciliation pipeline',
-    description: 'Implement automated batch cron job for balancing settlement ledgers against payment provider logs.',
-    assigneeId: 'emp-2',
-    assigneeName: 'Marcus Vance',
-    assigneeAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    priority: 'high',
-    status: 'backlog',
-    dueDate: '2026-10-05',
-    comments: [],
-    history: [
-      { id: 'h-8', action: 'Created task', author: 'Marcus Vance', timestamp: '2026-09-18 15:30' }
-    ]
-  },
-  {
-    id: 'task-106',
-    projectId: 'proj-3',
-    projectName: 'Enterprise CRM Migration',
-    title: 'Data sanitization and customer deduplication scripts',
-    description: 'Scan legacy customer records for duplicate tax IDs and clean historical email formats.',
-    assigneeId: 'emp-4',
-    assigneeName: 'David Kim',
-    assigneeAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    priority: 'low',
-    status: 'review',
-    dueDate: '2026-09-25',
-    comments: [],
-    history: [
-      { id: 'h-9', action: 'Moved to Review', author: 'David Kim', timestamp: '2026-09-19 16:45' }
-    ]
-  }
 ];
 
 export const initialAttendance: AttendanceRecord[] = [
@@ -276,58 +72,6 @@ export const initialAttendance: AttendanceRecord[] = [
     status: 'present',
     notes: 'In office — Sprint architecture review',
   },
-  {
-    id: 'att-2',
-    employeeId: 'emp-2',
-    employeeName: 'Marcus Vance',
-    date: '2026-09-21',
-    checkIn: '09:20',
-    checkOut: undefined,
-    workingHours: 5.3,
-    status: 'late',
-    notes: 'Transit delay on subway line',
-  },
-  {
-    id: 'att-3',
-    employeeId: 'emp-3',
-    employeeName: 'Elena Rostova',
-    date: '2026-09-21',
-    checkIn: '09:00',
-    checkOut: undefined,
-    workingHours: 5.7,
-    status: 'present',
-  },
-  {
-    id: 'att-4',
-    employeeId: 'emp-4',
-    employeeName: 'David Kim',
-    date: '2026-09-21',
-    checkIn: '08:45',
-    checkOut: undefined,
-    workingHours: 6.0,
-    status: 'present',
-  },
-  {
-    id: 'att-5',
-    employeeId: 'emp-5',
-    employeeName: 'Amina Nour',
-    date: '2026-09-21',
-    checkIn: '—',
-    checkOut: '—',
-    workingHours: 0,
-    status: 'leave',
-    notes: 'Approved medical leave',
-  },
-  {
-    id: 'att-6',
-    employeeId: 'emp-6',
-    employeeName: 'Liam Gallagher',
-    date: '2026-09-21',
-    checkIn: '09:05',
-    checkOut: undefined,
-    workingHours: 5.6,
-    status: 'present',
-  },
   // Yesterday records
   {
     id: 'att-7',
@@ -339,16 +83,6 @@ export const initialAttendance: AttendanceRecord[] = [
     workingHours: 8.7,
     status: 'present',
   },
-  {
-    id: 'att-8',
-    employeeId: 'emp-3',
-    employeeName: 'Elena Rostova',
-    date: '2026-09-20',
-    checkIn: '09:00',
-    checkOut: '17:15',
-    workingHours: 8.2,
-    status: 'present',
-  }
 ];
 
 export const initialLeaveRequests: LeaveRequest[] = [
@@ -365,43 +99,6 @@ export const initialLeaveRequests: LeaveRequest[] = [
     appliedOn: '2026-09-18',
     approvedBy: 'Sarah Chen (Admin)',
   },
-  {
-    id: 'leave-2',
-    employeeId: 'emp-3',
-    employeeName: 'Elena Rostova',
-    leaveType: 'Annual',
-    startDate: '2026-10-12',
-    endDate: '2026-10-16',
-    days: 5,
-    reason: 'Family holiday travel trip.',
-    status: 'pending',
-    appliedOn: '2026-09-19',
-  },
-  {
-    id: 'leave-3',
-    employeeId: 'emp-4',
-    employeeName: 'David Kim',
-    leaveType: 'Casual',
-    startDate: '2026-09-29',
-    endDate: '2026-09-29',
-    days: 1,
-    reason: 'Personal home utility appointment.',
-    status: 'pending',
-    appliedOn: '2026-09-20',
-  },
-  {
-    id: 'leave-4',
-    employeeId: 'emp-2',
-    employeeName: 'Marcus Vance',
-    leaveType: 'Casual',
-    startDate: '2026-08-14',
-    endDate: '2026-08-15',
-    days: 2,
-    reason: 'Conference attendance in Austin.',
-    status: 'approved',
-    appliedOn: '2026-08-01',
-    approvedBy: 'Sarah Chen (Admin)',
-  }
 ];
 
 export const initialLeaveBalances: Record<string, LeaveBalance> = {
@@ -424,44 +121,4 @@ export const initialActivityLog: ActivityLogItem[] = [
     timestamp: '2026-09-18 16:45',
     details: 'Status updated to Approved; Attendance marked as Leave.',
   },
-  {
-    id: 'act-2',
-    actorName: 'Marcus Vance',
-    actorRole: 'project_manager',
-    action: 'Created Task',
-    entityType: 'task',
-    entityName: 'Interactive Kanban board with drag-drop',
-    timestamp: '2026-09-15 14:00',
-    details: 'Assigned to David Kim under project AyiPM Core Platform.',
-  },
-  {
-    id: 'act-3',
-    actorName: 'Elena Rostova',
-    actorRole: 'employee',
-    action: 'Status Change',
-    entityType: 'task',
-    entityName: 'Build role-aware navigation shell',
-    timestamp: '2026-09-20 18:00',
-    details: 'Moved from In Progress to Review.',
-  },
-  {
-    id: 'act-4',
-    actorName: 'David Kim',
-    actorRole: 'employee',
-    action: 'Checked In',
-    entityType: 'attendance',
-    entityName: 'Daily Check-In at 08:45',
-    timestamp: '2026-09-21 08:45',
-    details: 'Status: Present (Within grace period).',
-  },
-  {
-    id: 'act-5',
-    actorName: 'Sarah Chen',
-    actorRole: 'admin',
-    action: 'Deployed Staging Build',
-    entityType: 'project',
-    entityName: 'AyiPM Core Platform',
-    timestamp: '2026-09-20 20:15',
-    details: 'Week 1 setup milestone verified on staging environment.',
-  }
 ];
