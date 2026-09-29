@@ -133,21 +133,26 @@ export default function EmployeesPage() {
         }}
       >
         <div style={{ display: 'flex', gap: '0.75rem', flex: 1, minWidth: '280px' }}>
-          <div style={{ position: 'relative', flex: 1 }}>
-            <Search
-              size={16}
-              color="var(--text-muted)"
-              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
-            />
+          <div className="search-bar-bended" style={{ height: '42px', flex: 1 }}>
+            <Search size={16} className="search-icon" />
             <input
               type="text"
               placeholder="Search by name, email, or designation..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="form-input"
-              style={{ paddingLeft: '2.25rem' }}
             />
+            {searchQuery && (
+              <button
+                type="button"
+                className="search-clear-btn"
+                onClick={() => setSearchQuery('')}
+                title="Clear search"
+              >
+                <X size={12} />
+              </button>
+            )}
           </div>
+
         </div>
 
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>

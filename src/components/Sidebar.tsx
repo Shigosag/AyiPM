@@ -14,13 +14,14 @@ import {
   CheckSquare,
   Activity,
   Settings,
+  Bell,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { employees, projects, tasks, attendance, leaveRequests, currentRole } = useApp();
+  const { employees, projects, tasks, attendance, leaveRequests, currentRole, unreadNotificationsCount } = useApp();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -81,12 +82,21 @@ export default function Sidebar() {
       roles: ['admin', 'project_manager', 'employee'],
     },
     {
+      name: 'Notifications',
+      href: '/notifications',
+      icon: Bell,
+      badge: unreadNotificationsCount > 0 ? unreadNotificationsCount : undefined,
+      badgeColor: 'badge-danger',
+      roles: ['admin', 'project_manager', 'employee'],
+    },
+    {
       name: 'Settings',
       href: '/settings',
       icon: Settings,
       roles: ['admin', 'project_manager', 'employee'],
     },
   ];
+
 
   return (
     <aside

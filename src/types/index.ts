@@ -115,3 +115,21 @@ export interface ActivityLogItem {
   timestamp: string;
   details?: string;
 }
+
+export type NotificationCategory = 'task' | 'leave' | 'attendance' | 'system';
+
+export interface NotificationItem {
+  id: string;
+  title: string;
+  message: string;
+  category: NotificationCategory;
+  timestamp: string; // ISO string or date string
+  read: boolean;
+  link?: string;
+  priority?: 'urgent' | 'high' | 'normal' | 'low';
+  sender?: {
+    name: string;
+    avatar?: string;
+  };
+}
+

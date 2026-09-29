@@ -14,6 +14,9 @@ import {
   ChevronDown,
   Sparkles,
 } from 'lucide-react';
+import NotificationDropdown from '@/components/NotificationDropdown';
+import GlobalSearch from '@/components/GlobalSearch';
+
 
 export default function Navbar() {
   const {
@@ -143,6 +146,11 @@ export default function Navbar() {
             ✓ Shift Logged ({todayRecord?.workingHours}h)
           </span>
         )}
+      </div>
+
+      {/* Center: Global Search with Theme Bended Edges */}
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', padding: '0 1.5rem', maxWidth: '440px' }}>
+        <GlobalSearch />
       </div>
 
       {/* Right side: Role Switcher & Persona Display */}
@@ -280,6 +288,9 @@ export default function Navbar() {
             </>
           )}
         </div>
+
+        {/* Notifications Dropdown */}
+        <NotificationDropdown />
 
         {/* User Card */}
         <div
