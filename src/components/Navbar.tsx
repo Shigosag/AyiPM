@@ -52,7 +52,7 @@ export default function Navbar() {
 
   const todayStr = new Date().toISOString().slice(0, 10);
   const todayRecord = attendance.find(
-    (a) => a.employeeId === currentUser.id && a.date === todayStr
+    (a) => a.employeeId === currentUser?.id && a.date === todayStr
   );
   const isCheckedIn = Boolean(todayRecord && todayRecord.checkIn !== '—');
   const isCheckedOut = Boolean(todayRecord && todayRecord.checkOut);
@@ -303,8 +303,8 @@ export default function Navbar() {
           }}
         >
           <img
-            src={currentUser.avatar}
-            alt={currentUser.name}
+            src={currentUser?.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80'}
+            alt={currentUser?.name || 'User avatar'}
             className="avatar"
             style={{ width: '38px', height: '38px' }}
           />
