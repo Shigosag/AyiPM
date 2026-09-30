@@ -121,13 +121,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const defaultFallbackUser: Employee = {
+    id: 'emp-1',
+    name: 'Sarah Chen',
+    email: 'sarah.chen@ayipm.io',
+    department: 'Engineering',
+    designation: 'Tech Lead / Architect',
+    role: currentRole,
+    status: 'active',
+    joinDate: '2023-01-15',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+    phone: '',
+    location: '',
+  };
+
   // Determine active profile based on persona
   const currentUser: Employee =
-    currentRole === 'admin'
-      ? employees.find((e) => e.role === 'admin') || employees[0]
+    (currentRole === 'admin'
+      ? employees.find((e) => e.role === 'admin')
       : currentRole === 'project_manager'
-      ? employees.find((e) => e.role === 'project_manager') || employees[1]
-      : employees.find((e) => e.role === 'employee') || employees[2];
+      ? employees.find((e) => e.role === 'project_manager')
+      : employees.find((e) => e.role === 'employee')) ||
+    employees[0] ||
+    defaultFallbackUser;
 
   const logActivity = (
     action: string,
