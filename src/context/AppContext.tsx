@@ -41,7 +41,12 @@ interface AppContextType {
   
   // Actions
   addEmployee: (emp: Omit<Employee, 'id'>) => void;
+  updateEmployeeRole: (id: string, newRole: UserRole) => void;
+  updateEmployee: (id: string, data: Partial<Employee>) => void;
   toggleEmployeeStatus: (id: string) => void;
+  assignEmployeeToProject: (employeeId: string, projectId: string) => void;
+  removeEmployeeFromProject: (employeeId: string, projectId: string) => void;
+  setEmployeeProjects: (employeeId: string, projectIds: string[]) => void;
   checkIn: (employeeId?: string, notes?: string) => void;
   checkOut: (employeeId?: string) => void;
   submitLeaveRequest: (data: Omit<LeaveRequest, 'id' | 'status' | 'appliedOn' | 'employeeName'>) => void;
@@ -270,6 +275,116 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       saveState('ayipm_employees', updated);
       return updated;
     });
+  };
+
+  const updateEmployeeRole = (id: string, newRole: UserRole) => {
+    setEmployees((prev) => {
+      const updated = prev.map((e) => {
+        if (e.id === id) {
+          logActivity(
+            'Updated Employee Role',
+            'employee',
+            e.name,
+            `Role changed from ${e.role} to ${newRole}`
+          );
+          return { ...e, role: newRole };
+        }
+        return e;
+      });
+      saveState('ayipm_employees', updated);
+      return updated;
+    });
+  };
+
+  const updateEmployee = (id: string, data: Partial<Employee>) => {
+    setEmployees((prev) => {
+      const updated = prev.map((e) => {
+        if (e.id === id) {
+          const merged = { ...e, ...data };
+          logActivity('Updated Employee Profile', 'employee', merged.name, `Profile details updated`);
+          return merged;
+        }
+        return e;
+      });
+      saveState('ayipm_employees', updated);
+      return updated;
+    });
+  };
+
+  const assignEmployeeToProject = (employeeId: string, projectId: string) => {
+    const emp = employees.find((e) => e.id === employeeId);
+    setProjects((prev) => {
+      const updated = prev.map((p) => {
+        if (p.id === projectId && !p.members.includes(employeeId)) {
+          return { ...p, members: [...p.members, employeeId] };
+        }
+        return p;
+      });
+      saveState('ayipm_projects', updated);
+      return updated;
+    });
+    const proj = projects.find((p) => p.id === projectId);
+    if (emp && proj) {
+      logActivity('Assigned to Project', 'project', proj.name, `Assigned ${emp.name} to ${proj.name}`);
+      addNotification({
+        title: 'Project Assignment',
+        message: `${emp.name} was assigned to project "${proj.name}".`,
+        category: 'task',
+        link: '/team',
+        priority: 'normal',
+      });
+    }
+  };
+
+  const removeEmployeeFromProject = (employeeId: string, projectId: string) => {
+    const emp = employees.find((e) => e.id === employeeId);
+    setProjects((prev) => {
+      const updated = prev.map((p) => {
+        if (p.id === projectId && p.members.includes(employeeId)) {
+          return { ...p, members: p.members.filter((m) => m !== employeeId) };
+        }
+        return p;
+      });
+      saveState('ayipm_projects', updated);
+      return updated;
+    });
+    const proj = projects.find((p) => p.id === projectId);
+    if (emp && proj) {
+      logActivity('Removed from Project', 'project', proj.name, `Removed ${emp.name} from ${proj.name}`);
+    }
+  };
+
+  const setEmployeeProjects = (employeeId: string, projectIds: string[]) => {
+    const emp = employees.find((e) => e.id === employeeId);
+    setProjects((prev) => {
+      const updated = prev.map((p) => {
+        const shouldBeMember = projectIds.includes(p.id);
+        const isCurrentMember = p.members.includes(employeeId);
+        if (shouldBeMember && !isCurrentMember) {
+          return { ...p, members: [...p.members, employeeId] };
+        } else if (!shouldBeMember && isCurrentMember) {
+          return { ...p, members: p.members.filter((m) => m !== employeeId) };
+        }
+        return p;
+      });
+      saveState('ayipm_projects', updated);
+      return updated;
+    });
+    if (emp) {
+      logActivity(
+        'Updated Project Assignments',
+        'project',
+        emp.name,
+        `Allocated to ${projectIds.length} project(s)`
+      );
+      addNotification({
+        title: 'Project Assignments Updated',
+        message: `Project allocations for ${emp.name} were updated (${projectIds.length} active project${projectIds.length === 1 ? '' : 's'}).`,
+        category: 'task',
+        link: '/team',
+        priority: 'normal',
+      });
+    }
   };
 
   const checkIn = (targetId?: string, notes?: string) => {
@@ -623,7 +738,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         notifications,
         unreadNotificationsCount,
         addEmployee,
+        updateEmployeeRole,
+        updateEmployee,
         toggleEmployeeStatus,
+        assignEmployeeToProject,
+        removeEmployeeFromProject,
+        setEmployeeProjects,
         checkIn,
         checkOut,
         submitLeaveRequest,

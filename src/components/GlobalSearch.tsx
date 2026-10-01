@@ -308,7 +308,7 @@ export default function GlobalSearch() {
                     <button
                       key={e.id}
                       type="button"
-                      onClick={() => handleSelect('/employees')}
+                      onClick={() => handleSelect('/team')}
                       style={{
                         width: '100%',
                         display: 'flex',

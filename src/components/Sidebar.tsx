@@ -40,8 +40,8 @@ export default function Sidebar() {
       roles: ['admin', 'project_manager', 'employee'],
     },
     {
-      name: 'Employees',
-      href: '/employees',
+      name: 'Team',
+      href: '/team',
       icon: Users,
       badge: employees.filter((e) => e.status === 'active').length,
       roles: ['admin', 'project_manager', 'employee'],
@@ -237,7 +237,7 @@ export default function Sidebar() {
 
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || (item.href === '/team' && pathname === '/employees');
 
           return (
             <Link
