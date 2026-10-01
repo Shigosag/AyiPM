@@ -98,9 +98,9 @@ export default function DashboardPage() {
         {/* Quick actions bar */}
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           {currentRole === 'admin' && (
-            <Link href="/employees" className="btn btn-primary">
+            <Link href="/team" className="btn btn-primary">
               <PlusCircle size={16} />
-              <span>Onboard Employee</span>
+              <span>Onboard Member</span>
             </Link>
           )}
           {(currentRole === 'admin' || currentRole === 'project_manager') && (

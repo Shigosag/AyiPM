@@ -433,6 +433,24 @@ html, body {
   border: 1px solid #ddd6fe;
 }
 
+.badge-role-admin {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.badge-role-pm {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #7dd3fc;
+}
+
+.badge-role-employee {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
 /* Tables */
 .table-wrapper {
   overflow-x: auto;
