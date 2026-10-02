@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { UserRole } from '@/types';
 import {
@@ -13,8 +15,10 @@ import {
   CheckCircle2,
   ChevronDown,
   Sparkles,
+  Settings,
 } from 'lucide-react';
 import NotificationDropdown from '@/components/NotificationDropdown';
+import ProfileDropdown from '@/components/ProfileDropdown';
 import GlobalSearch from '@/components/GlobalSearch';
 
 
@@ -29,6 +33,7 @@ export default function Navbar() {
     resetAllData,
   } = useApp();
 
+  const pathname = usePathname();
   const [timeStr, setTimeStr] = useState<string>('');
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
 
@@ -86,7 +91,7 @@ export default function Navbar() {
       style={{
         height: '70px',
         borderBottom: '1px solid var(--border-subtle)',
-        background: 'rgba(255, 255, 255, 0.92)',
+        background: 'var(--bg-header, rgba(255, 255, 255, 0.92))',
         backdropFilter: 'blur(16px)',
         display: 'flex',
         alignItems: 'center',
@@ -176,118 +181,7 @@ export default function Navbar() {
           <RotateCcw size={16} />
         </button>
 
-        {/* Interactive Role Switcher */}
-        <div style={{ position: 'relative' }}>
-          <button
-            onClick={() => setRoleMenuOpen(!roleMenuOpen)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.625rem',
-              background: '#ffffff',
-              border: '1px solid var(--border-medium)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '0.4rem 0.875rem',
-              color: 'var(--text-primary)',
-              cursor: 'pointer',
-              boxShadow: 'var(--shadow-sm)',
-              transition: 'all var(--transition-fast)',
-            }}
-          >
-            <div style={{ textAlign: 'left', lineHeight: 1.2 }}>
-              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>
-                Active Persona
-              </div>
-              <div style={{ fontSize: '0.875rem', fontWeight: 700, textTransform: 'capitalize' }}>
-                {currentRole.replace('_', ' ')}
-              </div>
-            </div>
-            <ChevronDown size={15} color="var(--text-secondary)" />
-          </button>
-
-          {roleMenuOpen && (
-            <>
-              <div
-                style={{ position: 'fixed', inset: 0, zIndex: 50 }}
-                onClick={() => setRoleMenuOpen(false)}
-              />
-              <div
-                style={{
-                  position: 'absolute',
-                  right: 0,
-                  top: 'calc(100% + 8px)',
-                  width: '320px',
-                  background: '#ffffff',
-                  border: '1px solid var(--border-medium)',
-                  borderRadius: 'var(--radius-lg)',
-                  boxShadow: 'var(--shadow-lg)',
-                  padding: '0.5rem',
-                  zIndex: 60,
-                }}
-              >
-                <div
-                  style={{
-                    padding: '0.5rem 0.75rem',
-                    fontSize: '0.72rem',
-                    color: 'var(--text-muted)',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  Switch Perspective
-                </div>
-                {roles.map((r) => {
-                  const Icon = r.icon;
-                  const isActive = currentRole === r.role;
-                  return (
-                    <button
-                      key={r.role}
-                      onClick={() => {
-                        setCurrentRole(r.role);
-                        setRoleMenuOpen(false);
-                      }}
-                      style={{
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '0.75rem',
-                        padding: '0.625rem 0.75rem',
-                        borderRadius: 'var(--radius-md)',
-                        background: isActive ? '#f0f9ff' : 'transparent',
-                        border: isActive ? '1px solid #bae6fd' : '1px solid transparent',
-                        color: 'var(--text-primary)',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        transition: 'background var(--transition-fast)',
-                      }}
-                    >
-                      <div
-                        style={{
-                          background: `${r.color}15`,
-                          color: r.color,
-                          padding: '0.4rem',
-                          borderRadius: 'var(--radius-sm)',
-                          display: 'flex',
-                        }}
-                      >
-                        <Icon size={16} />
-                      </div>
-                      <div>
-                        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: isActive ? '#0284c7' : 'inherit' }}>
-                          {r.label}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                          {r.desc}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          )}
-        </div>
+        
 
         {/* Notifications Dropdown */}
         <NotificationDropdown />
@@ -297,17 +191,10 @@ export default function Navbar() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.75rem',
             paddingLeft: '0.5rem',
-            borderLeft: '1px solid var(--border-subtle)',
           }}
         >
-          <img
-            src={currentUser?.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80'}
-            alt={currentUser?.name || 'User avatar'}
-            className="avatar"
-            style={{ width: '38px', height: '38px' }}
-          />
+          <ProfileDropdown />
         </div>
       </div>
     </header>
