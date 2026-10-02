@@ -1,4 +1,5 @@
 export type UserRole = 'admin' | 'project_manager' | 'employee';
+export type ThemeMode = 'dark' | 'light' | 'device';
 
 export interface Employee {
   id: string;

@@ -13,6 +13,7 @@ import {
   TaskStatus,
   ProjectStatus,
   NotificationItem,
+  ThemeMode,
 } from '@/types';
 import {
   initialEmployees,
@@ -38,6 +39,10 @@ interface AppContextType {
   activityLog: ActivityLogItem[];
   notifications: NotificationItem[];
   unreadNotificationsCount: number;
+  theme: ThemeMode;
+  setTheme: (theme: ThemeMode) => void;
+  language: string;
+  setLanguage: (lang: string) => void;
   
   // Actions
   addEmployee: (emp: Omit<Employee, 'id'>) => void;
@@ -78,10 +83,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [leaveBalances, setLeaveBalances] = useState<Record<string, LeaveBalance>>(initialLeaveBalances);
   const [activityLog, setActivityLog] = useState<ActivityLogItem[]>(initialActivityLog);
   const [notifications, setNotifications] = useState<NotificationItem[]>(initialNotifications);
+  const [theme, setThemeState] = useState<ThemeMode>('light');
+  const [language, setLanguageState] = useState<string>('English (US)');
+
+  const applyThemeToDOM = (mode: ThemeMode) => {
+    if (typeof window === 'undefined') return;
+    const root = document.documentElement;
+    if (mode === 'dark') {
+      root.setAttribute('data-theme', 'dark');
+    } else if (mode === 'light') {
+      root.setAttribute('data-theme', 'light');
+    } else if (mode === 'device') {
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+    }
+  };
 
   // Load from localStorage if present
   useEffect(() => {
     try {
+      const savedTheme = localStorage.getItem('ayipm_theme') as ThemeMode | null;
+      if (savedTheme && ['dark', 'light', 'device'].includes(savedTheme)) {
+        setThemeState(savedTheme);
+        applyThemeToDOM(savedTheme);
+      } else {
+        applyThemeToDOM('light');
+      }
+
+      const savedLang = localStorage.getItem('ayipm_language');
+      if (savedLang) {
+        setLanguageState(savedLang);
+      }
       const savedRole = localStorage.getItem('ayipm_role');
       if (savedRole && ['admin', 'project_manager', 'employee'].includes(savedRole)) {
         setCurrentRole(savedRole as UserRole);
@@ -106,6 +138,39 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // ignore
     }
   }, []);
+
+  // Listen to system theme preference changes when mode is 'device'
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e: MediaQueryListEvent) => {
+      const currentTheme = localStorage.getItem('ayipm_theme');
+      if (currentTheme === 'device') {
+        document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+      }
+    };
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  const setTheme = (mode: ThemeMode) => {
+    setThemeState(mode);
+    applyThemeToDOM(mode);
+    try {
+      localStorage.setItem('ayipm_theme', mode);
+    } catch {
+      // ignore
+    }
+  };
+
+  const setLanguage = (lang: string) => {
+    setLanguageState(lang);
+    try {
+      localStorage.setItem('ayipm_language', lang);
+    } catch {
+      // ignore
+    }
+  };
 
 
   // Save changes to localStorage
@@ -737,6 +802,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         activityLog,
         notifications,
         unreadNotificationsCount,
+        theme,
+        setTheme,
+        language,
+        setLanguage,
         addEmployee,
         updateEmployeeRole,
         updateEmployee,
