@@ -18,13 +18,14 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
+import { getLocalDateString } from '@/utils/dateTime';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { employees, projects, tasks, attendance, leaveRequests, currentRole, unreadNotificationsCount } = useApp();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getLocalDateString();
   const todayPresentCount = attendance.filter(
     (a) => a.date === todayStr && a.status !== 'leave' && a.status !== 'absent'
   ).length;
@@ -87,12 +88,6 @@ export default function Sidebar() {
       icon: Bell,
       badge: unreadNotificationsCount > 0 ? unreadNotificationsCount : undefined,
       badgeColor: 'badge-danger',
-      roles: ['admin', 'project_manager', 'employee'],
-    },
-    {
-      name: 'Settings',
-      href: '/settings',
-      icon: Settings,
       roles: ['admin', 'project_manager', 'employee'],
     },
   ];
@@ -284,50 +279,6 @@ export default function Sidebar() {
           );
         })}
       </nav>
-
-      {/* Role Indicator Footer - Light Mode */}
-      {!isCollapsed && (
-        <div
-          style={{
-            padding: '1rem',
-            borderTop: '1px solid var(--border-subtle)',
-            backgroundColor: '#f8fafc',
-          }}
-        >
-          <div
-            style={{
-              background: '#ffffff',
-              borderRadius: 'var(--radius-md)',
-              padding: '0.75rem',
-              border: '1px solid var(--border-subtle)',
-              boxShadow: 'var(--shadow-sm)',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-                Perspective
-              </span>
-              <span
-                style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  color: currentRole === 'admin' ? '#d97706' : currentRole === 'project_manager' ? '#0284c7' : '#059669',
-                  textTransform: 'capitalize',
-                }}
-              >
-                {currentRole.replace('_', ' ')}
-              </span>
-            </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.3 }}>
-              {currentRole === 'admin'
-                ? 'Root access to employee onboarding, approvals & system settings.'
-                : currentRole === 'project_manager'
-                  ? 'Organize sprints, manage tasks, and approve team leave.'
-                  : 'Log personal attendance, submit leave, and update personal tasks.'}
-            </div>
-          </div>
-        </div>
-      )}
     </aside>
   );
 }

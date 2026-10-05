@@ -22,8 +22,10 @@ export interface AttendanceRecord {
   employeeId: string;
   employeeName: string;
   date: string; // YYYY-MM-DD
-  checkIn: string; // HH:MM
-  checkOut?: string; // HH:MM
+  checkIn: string; // HH:MM or HH:MM:SS AM/PM
+  checkOut?: string; // HH:MM or HH:MM:SS AM/PM
+  checkInTime?: string; // ISO timestamp string
+  checkOutTime?: string; // ISO timestamp string
   workingHours?: number; // decimal hours
   status: AttendanceStatus;
   notes?: string;

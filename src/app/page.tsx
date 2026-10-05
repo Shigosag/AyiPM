@@ -19,6 +19,7 @@ import {
   Check,
   X,
 } from 'lucide-react';
+import { getLocalDateString } from '@/utils/dateTime';
 
 export default function DashboardPage() {
   const {
@@ -34,7 +35,7 @@ export default function DashboardPage() {
     reviewLeaveRequest,
   } = useApp();
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getLocalDateString();
   const todayRecords = attendance.filter((a) => a.date === todayStr);
   const presentCount = todayRecords.filter((a) => a.status === 'present').length;
   const lateCount = todayRecords.filter((a) => a.status === 'late').length;

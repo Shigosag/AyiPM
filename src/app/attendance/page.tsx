@@ -14,7 +14,14 @@ import {
   AlertTriangle,
   FileSpreadsheet,
   Check,
+  RotateCcw,
 } from 'lucide-react';
+import {
+  getLocalDateString,
+  calculateElapsedSeconds,
+  formatLiveTimer,
+  formatWorkingHoursDisplay,
+} from '@/utils/dateTime';
 
 export default function AttendancePage() {
   const { attendance, employees, currentUser, currentRole, checkIn, checkOut } = useApp();
@@ -24,14 +31,31 @@ export default function AttendancePage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [activeTab, setActiveTab] = useState<'daily' | 'monthly'>('daily');
   const [exportNotice, setExportNotice] = useState(false);
+  const [liveElapsed, setLiveElapsed] = useState<string>('00:00:00');
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getLocalDateString();
   const myRecordToday = attendance.find(
     (a) => a.employeeId === currentUser.id && a.date === todayStr
   );
 
   const isCheckedIn = Boolean(myRecordToday && myRecordToday.checkIn !== '—');
   const isCheckedOut = Boolean(myRecordToday && myRecordToday.checkOut);
+
+  // Live timer for active shift
+  React.useEffect(() => {
+    if (!isCheckedIn || isCheckedOut) return;
+
+    const tick = () => {
+      const secs = calculateElapsedSeconds(
+        myRecordToday?.checkInTime || myRecordToday?.checkIn || ''
+      );
+      setLiveElapsed(formatLiveTimer(secs));
+    };
+
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [isCheckedIn, isCheckedOut, myRecordToday]);
 
   const filteredAttendance = attendance.filter((rec) => {
     const matchesDate = !dateFilter || rec.date === dateFilter;
@@ -130,7 +154,7 @@ export default function AttendancePage() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '1.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Status Today</span>
             <div style={{ marginTop: '0.25rem' }}>
@@ -144,20 +168,59 @@ export default function AttendancePage() {
 
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Time In</span>
-            <span style={{ fontSize: '1rem', fontWeight: 600, marginTop: '0.25rem' }}>
+            <span style={{ fontSize: '0.95rem', fontWeight: 600, marginTop: '0.25rem', fontFamily: 'var(--font-mono, monospace)' }}>
               {myRecordToday?.checkIn || '—'}
             </span>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Time Out</span>
-            <span style={{ fontSize: '1rem', fontWeight: 600, marginTop: '0.25rem' }}>
-              {myRecordToday?.checkOut || '—'}
+            <span style={{ fontSize: '0.95rem', fontWeight: 600, marginTop: '0.25rem', fontFamily: 'var(--font-mono, monospace)' }}>
+              {myRecordToday?.checkOut || (isCheckedIn ? 'Active Now' : '—')}
             </span>
           </div>
+
+          {isCheckedIn && !isCheckedOut && (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Live Shift Duration</span>
+              <span
+                style={{
+                  fontSize: '0.95rem',
+                  fontWeight: 700,
+                  marginTop: '0.25rem',
+                  color: '#059669',
+                  fontFamily: 'var(--font-mono, monospace)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                }}
+              >
+                <span
+                  style={{
+                    width: '7px',
+                    height: '7px',
+                    borderRadius: '50%',
+                    backgroundColor: '#10b981',
+                    display: 'inline-block',
+                    boxShadow: '0 0 6px #10b981',
+                  }}
+                />
+                {liveElapsed}
+              </span>
+            </div>
+          )}
+
+          {isCheckedOut && (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Duration Logged</span>
+              <span style={{ fontSize: '0.95rem', fontWeight: 700, marginTop: '0.25rem', color: 'var(--text-primary)' }}>
+                {formatWorkingHoursDisplay(myRecordToday?.workingHours)}
+              </span>
+            </div>
+          )}
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', alignItems: 'center' }}>
           {!isCheckedIn ? (
             <button onClick={() => checkIn()} className="btn btn-primary" style={{ padding: '0.75rem 1.5rem' }}>
               <CheckCircle2 size={18} />
@@ -167,19 +230,30 @@ export default function AttendancePage() {
             <button
               onClick={() => checkOut()}
               className="btn btn-danger"
-              style={{ padding: '0.75rem 1.5rem' }}
+              style={{ padding: '0.75rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
             >
               <LogOut size={18} />
-              <span>Check Out</span>
+              <span>Check Out Now</span>
             </button>
           ) : (
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.875rem', color: 'var(--success)', fontWeight: 600 }}>
-                Shift Completed
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.875rem', color: 'var(--success)', fontWeight: 600 }}>
+                  ✓ Shift Completed
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                  {formatWorkingHoursDisplay(myRecordToday?.workingHours)} total
+                </div>
               </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                Total: {myRecordToday?.workingHours} hrs logged
-              </div>
+              <button
+                onClick={() => checkIn()}
+                className="btn btn-secondary btn-sm"
+                style={{ padding: '0.5rem 0.85rem' }}
+                title="Start another attendance session today"
+              >
+                <RotateCcw size={14} />
+                <span>Check In Again</span>
+              </button>
             </div>
           )}
         </div>
@@ -302,7 +376,7 @@ export default function AttendancePage() {
                     <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>{rec.checkOut || '—'}</td>
                     <td>
                       <span style={{ fontWeight: 600 }}>
-                        {rec.workingHours ? `${rec.workingHours} hrs` : '—'}
+                        {formatWorkingHoursDisplay(rec.workingHours)}
                       </span>
                     </td>
                     <td>

@@ -25,6 +25,13 @@ import {
   initialActivityLog,
   initialNotifications,
 } from '@/data/seedData';
+import {
+  getLocalDateString,
+  formatTimeDisplay,
+  parseTimeToDate,
+  formatWorkingHoursDisplay,
+  isLateCheckIn,
+} from '@/utils/dateTime';
 
 interface AppContextType {
   currentRole: UserRole;
@@ -457,14 +464,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const emp = employees.find((e) => e.id === empId);
     if (!emp) return;
 
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = getLocalDateString();
     const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const mins = String(now.getMinutes()).padStart(2, '0');
-    const timeStr = `${hours}:${mins}`;
+    const timeStr = formatTimeDisplay(now, true);
 
     // Derivation rule: after 09:15 is considered late
-    const isLate = now.getHours() > 9 || (now.getHours() === 9 && now.getMinutes() > 15);
+    const isLate = isLateCheckIn(now);
     const status = isLate ? 'late' : 'present';
 
     const newRec: AttendanceRecord = {
@@ -473,13 +478,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       employeeName: emp.name,
       date: todayStr,
       checkIn: timeStr,
+      checkInTime: now.toISOString(),
       status,
-      workingHours: 0.1,
+      workingHours: 0,
       notes: notes || (isLate ? 'Checked in after 09:15 grace window' : 'Regular on-time check-in'),
     };
 
     setAttendance((prev) => {
-      // Remove any duplicate today record for this employee
+      // Remove any existing record for this employee today (or re-checkin)
       const filtered = prev.filter((r) => !(r.employeeId === empId && r.date === todayStr));
       const updated = [newRec, ...filtered];
       saveState('ayipm_attendance', updated);
@@ -495,33 +501,53 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         link: '/attendance',
         priority: 'normal',
       });
+    } else {
+      addNotification({
+        title: 'Attendance Check-In',
+        message: `${emp.name} checked in on time at ${timeStr}`,
+        category: 'attendance',
+        link: '/attendance',
+        priority: 'low',
+      });
     }
   };
 
   const checkOut = (targetId?: string) => {
     const empId = targetId || currentUser.id;
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const emp = employees.find((e) => e.id === empId) || currentUser;
+    const todayStr = getLocalDateString();
     const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const mins = String(now.getMinutes()).padStart(2, '0');
-    const timeStr = `${hours}:${mins}`;
+    const timeStr = formatTimeDisplay(now, true);
+
+    let loggedHours = 0;
 
     setAttendance((prev) => {
       const updated = prev.map((r) => {
         if (r.employeeId === empId && r.date === todayStr) {
-          // calculate worked hours from checkIn
-          const [inH, inM] = r.checkIn.split(':').map(Number);
-          let calcHours = 8.0;
-          if (!isNaN(inH) && !isNaN(inM)) {
-            const diffMin = (now.getHours() * 60 + now.getMinutes()) - (inH * 60 + inM);
-            calcHours = Math.max(0.5, Math.round((diffMin / 60) * 10) / 10);
+          let calcHours = 0;
+          if (r.checkInTime) {
+            const startMs = new Date(r.checkInTime).getTime();
+            const diffMs = Math.max(0, now.getTime() - startMs);
+            calcHours = Math.round((diffMs / 3600000) * 100) / 100;
+          } else {
+            // Robust parsing for existing seed data or non-ISO checkIns
+            const startDate = parseTimeToDate(r.checkIn, now);
+            const diffMs = Math.max(0, now.getTime() - startDate.getTime());
+            calcHours = Math.round((diffMs / 3600000) * 100) / 100;
           }
+          if (calcHours <= 0) calcHours = 0.01;
+
+          // Status rule: if total worked hours < 4.5, mark as half_day; otherwise retain on-time/late status
           const finalStatus = calcHours < 4.5 ? 'half_day' : r.status;
+          loggedHours = calcHours;
+
           return {
             ...r,
             checkOut: timeStr,
+            checkOutTime: now.toISOString(),
             workingHours: calcHours,
             status: finalStatus,
+            notes: r.notes || (finalStatus === 'half_day' ? 'Half-day shift (under 4.5 hrs)' : 'Standard shift completed'),
           };
         }
         return r;
@@ -530,7 +556,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return updated;
     });
 
-    logActivity('Attendance Check-Out', 'attendance', currentUser.name, `Checked out at ${timeStr}`);
+    const hoursText = formatWorkingHoursDisplay(loggedHours);
+    logActivity('Attendance Check-Out', 'attendance', emp.name, `Checked out at ${timeStr} (${hoursText} logged)`);
+    addNotification({
+      title: 'Attendance Check-Out',
+      message: `${emp.name} checked out at ${timeStr} (${hoursText} logged)`,
+      category: 'attendance',
+      link: '/attendance',
+      priority: 'normal',
+    });
   };
 
   const submitLeaveRequest = (
@@ -542,7 +576,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       id: `leave-${Date.now()}`,
       employeeName: emp.name,
       status: 'pending',
-      appliedOn: new Date().toISOString().slice(0, 10),
+      appliedOn: getLocalDateString(),
     };
 
     setLeaveRequests((prev) => {
