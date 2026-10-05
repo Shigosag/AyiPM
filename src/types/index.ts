@@ -3,6 +3,7 @@ export type ThemeMode = 'dark' | 'light' | 'device';
 
 export interface Employee {
   id: string;
+  employeeId?: string; // Unique corporate badge ID, e.g. AX001
   name: string;
   email: string;
   department: string;

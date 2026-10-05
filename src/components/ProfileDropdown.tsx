@@ -36,6 +36,7 @@ export default function ProfileDropdown({ className }: ProfileDropdownProps) {
     language,
     setLanguage,
     resetAllData,
+    logout,
   } = useApp();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -83,9 +84,8 @@ export default function ProfileDropdown({ className }: ProfileDropdownProps) {
 
   const confirmLogout = () => {
     setLogoutConfirmOpen(false);
-    // Reset session / clear role or show demo logout
-    resetAllData();
-    router.push('/');
+    logout();
+    router.push('/login');
   };
 
   const languagesList = [
