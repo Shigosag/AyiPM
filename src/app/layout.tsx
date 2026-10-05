@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { AppProvider } from '@/context/AppContext';
-import Sidebar from '@/components/Sidebar';
-import Navbar from '@/components/Navbar';
+import AppShell from '@/components/AppShell';
 
 export const metadata: Metadata = {
   title: 'AyiPM — Employee & Project Management System',
@@ -18,13 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AppProvider>
-          <div className="app-layout">
-            <Sidebar />
-            <div className="main-content">
-              <Navbar />
-              {children}
-            </div>
-          </div>
+          <AppShell>{children}</AppShell>
         </AppProvider>
       </body>
     </html>

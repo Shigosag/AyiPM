@@ -3,6 +3,7 @@ import { Employee, Project, Task, AttendanceRecord, LeaveRequest, LeaveBalance, 
 export const initialEmployees: Employee[] = [
   {
     id: 'emp-1',
+    employeeId: 'AX001',
     name: 'Sarah Chen',
     email: 'sarah.chen@ayipm.io',
     department: 'Engineering',
@@ -16,6 +17,7 @@ export const initialEmployees: Employee[] = [
   },
   {
     id: 'emp-2',
+    employeeId: 'AX002',
     name: 'Marcus Vance',
     email: 'marcus.v@ayipm.io',
     department: 'Engineering',
@@ -29,6 +31,7 @@ export const initialEmployees: Employee[] = [
   },
   {
     id: 'emp-3',
+    employeeId: 'AX003',
     name: 'Elena Rostova',
     email: 'elena.r@ayipm.io',
     department: 'Engineering',
@@ -42,6 +45,7 @@ export const initialEmployees: Employee[] = [
   },
   {
     id: 'emp-4',
+    employeeId: 'AX004',
     name: 'David Kim',
     email: 'david.kim@ayipm.io',
     department: 'Engineering',
@@ -55,6 +59,7 @@ export const initialEmployees: Employee[] = [
   },
   {
     id: 'emp-5',
+    employeeId: 'AX005',
     name: 'Amina Nour',
     email: 'amina.n@ayipm.io',
     department: 'Product',
@@ -68,6 +73,7 @@ export const initialEmployees: Employee[] = [
   },
   {
     id: 'emp-6',
+    employeeId: 'AX006',
     name: 'Liam Gallagher',
     email: 'liam.g@ayipm.io',
     department: 'Operations',

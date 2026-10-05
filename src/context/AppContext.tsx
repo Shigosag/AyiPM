@@ -75,6 +75,20 @@ interface AppContextType {
   clearAllNotifications: () => void;
   addNotification: (item: Omit<NotificationItem, 'id' | 'timestamp' | 'read'>) => void;
   resetAllData: () => void;
+  login: (identifier: string, password?: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => void;
+  findEmployeeByIdOrEmail: (identifier: string) => Employee | undefined;
+  registerUser: (data: {
+    name: string;
+    email: string;
+    employeeId?: string;
+    role: UserRole;
+    department: string;
+    designation?: string;
+    password?: string;
+  }) => Promise<{ success: boolean; error?: string }>;
+  requestPasswordReset: (identifier: string) => Promise<{ success: boolean; error?: string }>;
+  resetPasswordConfirm: (identifier: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -82,6 +96,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [currentRole, setCurrentRole] = useState<UserRole>('admin');
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
@@ -125,8 +140,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (savedRole && ['admin', 'project_manager', 'employee'].includes(savedRole)) {
         setCurrentRole(savedRole as UserRole);
       }
+      const savedUserId = localStorage.getItem('ayipm_auth_user_id');
+      if (savedUserId) {
+        setCurrentUserId(savedUserId);
+      }
       const savedEmp = localStorage.getItem('ayipm_employees');
-      if (savedEmp) setEmployees(JSON.parse(savedEmp));
+      if (savedEmp) {
+        const parsed: Employee[] = JSON.parse(savedEmp);
+        const migrated = parsed.map((e, idx) => {
+          if (!e.employeeId) {
+            return { ...e, employeeId: `AX00${idx + 1}` };
+          }
+          return e;
+        });
+        setEmployees(migrated);
+      }
       const savedProj = localStorage.getItem('ayipm_projects');
       if (savedProj) setProjects(JSON.parse(savedProj));
       const savedTasks = localStorage.getItem('ayipm_tasks');
@@ -212,8 +240,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     location: '',
   };
 
-  // Determine active profile based on persona
+  // Determine active profile based on persona or authenticated user
   const currentUser: Employee =
+    (currentUserId ? employees.find((e) => e.id === currentUserId) : undefined) ||
     (currentRole === 'admin'
       ? employees.find((e) => e.role === 'admin')
       : currentRole === 'project_manager'
@@ -819,6 +848,218 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setActivityLog(initialActivityLog);
     setNotifications(initialNotifications);
     setCurrentRole('admin');
+    setCurrentUserId(null);
+  };
+
+  const findEmployeeByIdOrEmail = (identifier: string): Employee | undefined => {
+    if (!identifier) return undefined;
+    const clean = identifier.trim().toUpperCase();
+    const cleanLower = identifier.trim().toLowerCase();
+    return employees.find((e) => {
+      const badge = (e.employeeId || '').toUpperCase();
+      const id = e.id.toUpperCase();
+      // Sarah Chen admin alias for AX000
+      if (clean === 'AX000' && (id === 'EMP-1' || badge === 'AX001')) {
+        return true;
+      }
+      return badge === clean || id === clean || e.email.toLowerCase() === cleanLower;
+    });
+  };
+
+  const login = async (identifier: string, password?: string): Promise<{ success: boolean; error?: string }> => {
+    await new Promise((r) => setTimeout(r, 400));
+    const trimmed = identifier.trim();
+    if (!trimmed) {
+      return {
+        success: false,
+        error: 'Please enter your Employee ID (e.g. AX001) or work email.',
+      };
+    }
+
+    const emp = findEmployeeByIdOrEmail(trimmed);
+    if (!emp) {
+      return {
+        success: false,
+        error: `No employee found matching ID "${trimmed}". (Try AX001, AX002, AX003, or AX000)`,
+      };
+    }
+
+    if (emp.status === 'inactive') {
+      return {
+        success: false,
+        error: 'This account has been deactivated. Please contact your organization administrator.',
+      };
+    }
+
+    // Keep same password for all for testing purpose:
+    // Any password input is valid for testing
+    if (!password || password.trim().length === 0) {
+      return {
+        success: false,
+        error: 'Please enter a password (testing mode: any password accepted).',
+      };
+    }
+
+    setCurrentUserId(emp.id);
+    setCurrentRole(emp.role);
+    try {
+      localStorage.setItem('ayipm_auth_user_id', emp.id);
+      localStorage.setItem('ayipm_role', emp.role);
+    } catch {}
+
+    logActivity('User Sign In', 'employee', emp.name, `Signed into AyiPM session via ${emp.employeeId || emp.id}`);
+    addNotification({
+      title: 'Welcome Back',
+      message: `Signed in as ${emp.name} [${emp.employeeId || emp.id}] (${emp.role.replace('_', ' ')}).`,
+      category: 'system',
+      priority: 'low',
+    });
+
+    return { success: true };
+  };
+
+  const logout = () => {
+    logActivity('User Sign Out', 'employee', currentUser.name, 'Signed out of session');
+    setCurrentUserId(null);
+    try {
+      localStorage.removeItem('ayipm_auth_user_id');
+    } catch {}
+  };
+
+  const registerUser = async (data: {
+    name: string;
+    email: string;
+    employeeId?: string;
+    role: UserRole;
+    department: string;
+    designation?: string;
+    password?: string;
+  }): Promise<{ success: boolean; error?: string }> => {
+    await new Promise((r) => setTimeout(r, 500));
+
+    const trimmedEmail = data.email.trim().toLowerCase();
+    if (employees.some((e) => e.email.toLowerCase() === trimmedEmail)) {
+      return {
+        success: false,
+        error: 'An account with this email address already exists. Please sign in instead.',
+      };
+    }
+
+    // Check Employee ID uniqueness or auto-generate
+    let assignedBadge = data.employeeId?.trim().toUpperCase();
+    if (assignedBadge) {
+      const isTaken = employees.some(
+        (e) => (e.employeeId || '').toUpperCase() === assignedBadge || e.id.toUpperCase() === assignedBadge
+      );
+      if (isTaken) {
+        return {
+          success: false,
+          error: `Employee ID "${assignedBadge}" is already in use by another team member.`,
+        };
+      }
+    } else {
+      assignedBadge = `AX00${employees.length + 1}`;
+    }
+
+    const newEmp: Employee = {
+      id: `emp-${Date.now()}`,
+      employeeId: assignedBadge,
+      name: data.name.trim(),
+      email: trimmedEmail,
+      department: data.department || 'Engineering',
+      designation:
+        data.designation ||
+        (data.role === 'admin'
+          ? 'System Administrator'
+          : data.role === 'project_manager'
+          ? 'Project Manager'
+          : 'Software Engineer'),
+      role: data.role,
+      status: 'active',
+      joinDate: getLocalDateString(),
+      avatar:
+        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+      phone: '',
+      location: 'Headquarters',
+    };
+
+    const updatedEmployees = [...employees, newEmp];
+    setEmployees(updatedEmployees);
+    saveState('ayipm_employees', updatedEmployees);
+
+    setLeaveBalances((prev) => {
+      const updated = {
+        ...prev,
+        [newEmp.id]: {
+          employeeId: newEmp.id,
+          annualTotal: 20,
+          annualUsed: 0,
+          sickTotal: 10,
+          sickUsed: 0,
+          casualTotal: 7,
+          casualUsed: 0,
+        },
+      };
+      saveState('ayipm_balances', updated);
+      return updated;
+    });
+
+    setCurrentUserId(newEmp.id);
+    setCurrentRole(newEmp.role);
+    try {
+      localStorage.setItem('ayipm_auth_user_id', newEmp.id);
+      localStorage.setItem('ayipm_role', newEmp.role);
+    } catch {}
+
+    logActivity('Account Registration', 'employee', newEmp.name, `New ${newEmp.role.replace('_', ' ')} registered with ID ${assignedBadge}`);
+    addNotification({
+      title: 'Welcome to AyiPM!',
+      message: `Account created for ${newEmp.name} [${assignedBadge}]. You are logged in.`,
+      category: 'system',
+      priority: 'normal',
+    });
+
+    return { success: true };
+  };
+
+  const requestPasswordReset = async (identifier: string): Promise<{ success: boolean; error?: string }> => {
+    await new Promise((r) => setTimeout(r, 450));
+    const trimmed = identifier.trim();
+    const emp = findEmployeeByIdOrEmail(trimmed);
+    if (!emp) {
+      return {
+        success: false,
+        error: `No active AyiPM account was found matching "${trimmed}".`,
+      };
+    }
+
+    addNotification({
+      title: 'Password Recovery Sent',
+      message: `Password reset instructions dispatched for ${emp.name} (${emp.employeeId || emp.id}).`,
+      category: 'system',
+      priority: 'normal',
+    });
+
+    return { success: true };
+  };
+
+  const resetPasswordConfirm = async (
+    identifier: string,
+    newPassword: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    await new Promise((r) => setTimeout(r, 500));
+    const trimmed = identifier.trim();
+    const emp = findEmployeeByIdOrEmail(trimmed);
+
+    logActivity('Password Reset', 'employee', emp?.name || 'User', 'Successfully updated password');
+    addNotification({
+      title: 'Security Alert: Password Updated',
+      message: `Account password was updated for ${emp?.name || trimmed}.`,
+      category: 'system',
+      priority: 'high',
+    });
+
+    return { success: true };
   };
 
   return (
@@ -863,6 +1104,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         clearAllNotifications,
         addNotification,
         resetAllData,
+        login,
+        logout,
+        findEmployeeByIdOrEmail,
+        registerUser,
+        requestPasswordReset,
+        resetPasswordConfirm,
       }}
     >
       {children}
