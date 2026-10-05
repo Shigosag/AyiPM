@@ -20,12 +20,7 @@ import {
 import NotificationDropdown from '@/components/NotificationDropdown';
 import ProfileDropdown from '@/components/ProfileDropdown';
 import GlobalSearch from '@/components/GlobalSearch';
-import {
-  getLocalDateString,
-  calculateElapsedSeconds,
-  formatLiveTimer,
-  formatWorkingHoursDisplay,
-} from '@/utils/dateTime';
+import { getLocalDateString } from '@/utils/dateTime';
 
 export default function Navbar() {
   const {
@@ -40,15 +35,19 @@ export default function Navbar() {
 
   const pathname = usePathname();
   const [timeStr, setTimeStr] = useState<string>('');
-  const [liveElapsed, setLiveElapsed] = useState<string>('00:00:00');
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
 
   const todayStr = getLocalDateString();
   const todayRecord = attendance.find(
     (a) => a.employeeId === currentUser?.id && a.date === todayStr
   );
-  const isCheckedIn = Boolean(todayRecord && todayRecord.checkIn !== '—');
-  const isCheckedOut = Boolean(todayRecord && todayRecord.checkOut);
+  // True only when checked in and NOT yet checked out
+  const isCheckedIn = Boolean(
+    todayRecord &&
+    todayRecord.checkIn &&
+    todayRecord.checkIn !== '—' &&
+    !todayRecord.checkOut
+  );
 
   useEffect(() => {
     const updateTime = () => {
@@ -65,20 +64,12 @@ export default function Navbar() {
         hour12: true,
       });
       setTimeStr(`${datePart} • ${timePart}`);
-
-      if (todayRecord && todayRecord.checkIn && !todayRecord.checkOut) {
-        const secs = calculateElapsedSeconds(
-          todayRecord.checkInTime || todayRecord.checkIn,
-          now
-        );
-        setLiveElapsed(formatLiveTimer(secs));
-      }
     };
 
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
-  }, [todayRecord]);
+  }, []);
 
   const roles: { role: UserRole; label: string; desc: string; icon: any; color: string }[] = [
     {
@@ -141,64 +132,35 @@ export default function Navbar() {
           <span>{timeStr || 'System Time'}</span>
         </div>
 
-        {/* Quick Check-in action with Live Shift Timer */}
+        {/* Check-In / Check-Out Toggle Button */}
         {!isCheckedIn ? (
           <button
             onClick={() => checkIn()}
             className="btn btn-primary btn-sm"
-            title="Log attendance check-in for today"
+            title="Log attendance check-in"
             style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
           >
             <CheckCircle2 size={15} />
             <span>Check In</span>
           </button>
-        ) : !isCheckedOut ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                padding: '0.3rem 0.65rem',
-                background: '#ecfdf5',
-                border: '1px solid #a7f3d0',
-                borderRadius: 'var(--radius-full)',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                color: '#065f46',
-                fontFamily: 'var(--font-mono, monospace)',
-              }}
-              title={`Shift started at ${todayRecord?.checkIn}`}
-            >
-              <span
-                style={{
-                  width: '7px',
-                  height: '7px',
-                  borderRadius: '50%',
-                  backgroundColor: '#10b981',
-                  boxShadow: '0 0 6px #10b981',
-                }}
-              />
-              <span>{liveElapsed}</span>
-            </div>
-            <button
-              onClick={() => checkOut()}
-              className="btn btn-secondary btn-sm"
-              style={{
-                color: '#dc2626',
-                borderColor: '#fecaca',
-                background: '#fef2f2',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-              }}
-              title={`Shift started at ${todayRecord?.checkIn}. Click to record check-out.`}
-            >
-              <LogOut size={14} />
-              <span>Check Out</span>
-            </button>
-          </div>
-        ) : null}
+        ) : (
+          <button
+            onClick={() => checkOut()}
+            className="btn btn-secondary btn-sm"
+            style={{
+              color: '#dc2626',
+              borderColor: '#fecaca',
+              background: '#fef2f2',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+            }}
+            title="Log attendance check-out"
+          >
+            <LogOut size={14} />
+            <span>Check Out</span>
+          </button>
+        )}
       </div>
 
       {/* Center: Global Search with Theme Bended Edges */}
