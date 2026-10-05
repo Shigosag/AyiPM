@@ -18,6 +18,7 @@ import {
   History,
   CheckCircle2,
 } from 'lucide-react';
+import { getLocalDateString } from '@/utils/dateTime';
 
 export default function TasksPage() {
   const {
@@ -119,7 +120,7 @@ export default function TasksPage() {
     setCommentText('');
   };
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getLocalDateString();
 
   return (
     <div className="page-container">
