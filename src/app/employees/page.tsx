@@ -1,6 +1,6 @@
-'use client';
+import { redirect } from 'next/navigation';
+import { ROUTES } from '@/constants/navigation';
 
-// Re-export TeamManagementPage so both /team and /employees routes work seamlessly
-import TeamManagementPage from '@/app/team/page';
-
-export default TeamManagementPage;
+export default function EmployeesPage() {
+  redirect(ROUTES.team);
+}

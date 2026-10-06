@@ -1,0 +1,39 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.unreadToggle {
+  min-width: 190px;
+}
+
+.unreadToggle > label {
+  padding: 0;
+}
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.priority {
+  width: auto;
+  min-width: 170px;
+}
+
+@media (max-width: 640px) {
+  .priority {
+    width: 100%;
+  }
+}

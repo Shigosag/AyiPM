@@ -1,0 +1,38 @@
+.hint {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: var(--info-bg);
+  border-color: var(--info-border);
+}
+
+.hint:hover {
+  border-color: var(--info-border);
+}
+
+.icon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  background: var(--primary-glow);
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.text {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}

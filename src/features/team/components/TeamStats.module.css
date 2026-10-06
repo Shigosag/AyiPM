@@ -1,0 +1,7 @@
+.roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.35rem 0 0.15rem;
+  line-height: 1;
+}

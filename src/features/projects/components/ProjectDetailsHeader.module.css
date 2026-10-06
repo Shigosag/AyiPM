@@ -1,0 +1,26 @@
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: fit-content;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  margin-bottom: 0.35rem;
+}
+
+.back:hover {
+  color: var(--primary);
+}
+
+.statusLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.statusSelect {
+  width: auto;
+  min-width: 150px;
+}

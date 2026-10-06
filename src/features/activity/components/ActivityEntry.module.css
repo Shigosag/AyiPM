@@ -1,0 +1,134 @@
+.entry {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 0.75rem 0.5rem 0.75rem 0;
+}
+
+.entry:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 17px;
+  top: 3rem;
+  bottom: -0.75rem;
+  width: 2px;
+  background: var(--border-subtle);
+}
+
+.icon {
+  --tone: var(--text-secondary);
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--tone);
+  background: color-mix(in srgb, var(--tone) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tone) 22%, transparent);
+}
+
+.employee {
+  --tone: var(--primary);
+}
+
+.project {
+  --tone: var(--accent-strong);
+}
+
+.task {
+  --tone: var(--accent-soft);
+}
+
+.attendance {
+  --tone: var(--success);
+}
+
+.leave {
+  --tone: var(--warning);
+}
+
+.auth {
+  --tone: var(--danger);
+}
+
+.settings {
+  --tone: var(--text-secondary);
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.actor {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.actorName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.role {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-full);
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+}
+
+.time {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.summary {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.action {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.entity {
+  color: var(--text-primary);
+}
+
+.details {
+  align-self: flex-start;
+  max-width: 100%;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.75rem;
+  overflow-wrap: anywhere;
+}

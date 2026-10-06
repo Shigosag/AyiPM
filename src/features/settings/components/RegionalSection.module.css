@@ -1,0 +1,10 @@
+.select {
+  width: 240px;
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .select {
+    width: 100%;
+  }
+}

@@ -1,0 +1,15 @@
+.actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.reject {
+  color: var(--danger);
+  border-color: var(--danger-border);
+}
+
+.reject:hover:not(:disabled) {
+  background: var(--danger-bg);
+}
