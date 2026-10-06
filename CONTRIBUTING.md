@@ -2,6 +2,34 @@
 
 This guide covers how we work on AyiPM: how to pick up work, name branches and commits, open pull requests, and what reviewers check.
 
+## Finding something to work on
+
+Open issues are labelled by difficulty, so you can pick one that fits your experience:
+
+| Label | What to expect |
+| --- | --- |
+| `level: beginner` | Small, self-contained changes, usually in one or two files. Also labelled `good first issue`. |
+| `level: intermediate` | Features or tooling across a few files. You should be comfortable with React state and the store in `src/store`. |
+| `level: advanced` | Backend, architecture or security work. Comment with your plan before you start. |
+
+Unassigned issues by level:
+
+- [Beginner](https://github.com/mahfoos/AyiPM/issues?q=is%3Aissue+is%3Aopen+no%3Aassignee+label%3A%22level%3A+beginner%22)
+- [Intermediate](https://github.com/mahfoos/AyiPM/issues?q=is%3Aissue+is%3Aopen+no%3Aassignee+label%3A%22level%3A+intermediate%22)
+- [Advanced](https://github.com/mahfoos/AyiPM/issues?q=is%3Aissue+is%3Aopen+no%3Aassignee+label%3A%22level%3A+advanced%22)
+
+Area labels (`frontend`, `backend`, `devops`, `testing`, `task`, `project`, `dashboard`, `settings`, `user-management`, `Authentication`, `accessibility`) tell you which part of the app an issue touches.
+
+### Claiming an issue
+
+1. **Comment on the issue** saying you'd like to work on it, and briefly how you plan to do it.
+2. **Wait to be assigned.** A maintainer will assign you, usually within a day. Please don't start on an issue that is already assigned to someone else.
+3. **Work on one issue at a time** if you are new to the project. Once your first pull request is merged, feel free to pick up more.
+
+**The 7-day rule.** If there is no pull request or progress update within 7 days of being assigned, the issue may be unassigned so someone else can take it. If you need more time, just leave a comment; that's always fine.
+
+If you get stuck, ask in the issue. Questions are welcome, and an early question saves a lot of rework.
+
 ## Workflow
 
 Every change, however small, follows the same path:
@@ -17,9 +45,9 @@ A good issue has:
 - **A short, imperative title**, for example "Build Project Details Page" or "Fix leave balance after rejection".
 - **A task checklist** that describes what "done" means.
 - **The route it affects**, if any, for example `/projects/[id]`.
-- **Labels**: an area label (`frontend`, `task`, `project`, `dashboard`, `user-management`, `settings`, `Authentication`) and a type label (`bug`, `enhancement`, `documentation`).
+- **Labels**: a level label (`level: beginner`, `level: intermediate`, `level: advanced`), an area label (see above) and a type label (`bug`, `enhancement`, `documentation`).
 
-Assign the issue to yourself before you start, so two people don't pick up the same work.
+Make sure the issue is assigned to you before you start (see [Claiming an issue](#claiming-an-issue)), so two people don't pick up the same work.
 
 ### 2. Create a branch from the issue
 
