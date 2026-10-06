@@ -43,13 +43,17 @@ export function useProfileForm(user: Employee) {
     setErrors({});
   }, []);
 
+  const [saving, setSaving] = useState(false);
+
   const submit = useCallback(
-    (event: FormEvent) => {
+    async (event: FormEvent) => {
       event.preventDefault();
       const nextErrors = validateProfileForm(values);
       setErrors(nextErrors);
       if (hasErrors(nextErrors)) return;
-      const result = updateEmployee(user.id, toEmployeeUpdate(values));
+      setSaving(true);
+      const result = await updateEmployee(user.id, toEmployeeUpdate(values));
+      setSaving(false);
       if (!result.ok) {
         if (/email/i.test(result.error)) setErrors({ email: result.error });
         else toast.error(result.error);
@@ -63,5 +67,5 @@ export function useProfileForm(user: Employee) {
 
   const dirty = useMemo(() => !isSameProfile(values, baseline), [values, baseline]);
 
-  return { values, errors, dirty, setField, reset, submit };
+  return { values, errors, dirty, saving, setField, reset, submit };
 }

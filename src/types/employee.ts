@@ -15,6 +15,8 @@ export interface Employee {
   phone?: string;
   location?: string;
   bio?: string;
+  invited: boolean;
+  passwordResetRequestedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -22,4 +24,4 @@ export interface Employee {
 export type EmployeeInput = Pick<Employee, 'name' | 'email' | 'department' | 'designation' | 'role'> &
   Partial<Pick<Employee, 'employeeId' | 'joinDate' | 'avatar' | 'phone' | 'location' | 'bio'>>;
 
-export type EmployeeUpdate = Partial<Omit<Employee, 'id' | 'createdAt' | 'updatedAt'>>;
+export type EmployeeUpdate = Partial<Omit<Employee, 'id' | 'createdAt' | 'updatedAt' | 'invited' | 'passwordResetRequestedAt'>>;

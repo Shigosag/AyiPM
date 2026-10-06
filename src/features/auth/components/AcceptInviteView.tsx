@@ -5,8 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { LifeBuoy, Link2Off, MailOpen } from 'lucide-react';
 import { ButtonLink, Spinner } from '@/components/ui';
 import { ROUTES } from '@/constants/navigation';
-import { useWorkspace } from '@/store';
-import { useInvite } from '../hooks/useInvite';
+import { fetchInvite } from '@/store';
+import { useTokenLookup } from '../hooks/useTokenLookup';
 import { AuthCard } from './AuthCard';
 import { AuthSplitLayout } from './AuthSplitLayout';
 import { AuthStatus } from './AuthStatus';
@@ -35,14 +35,14 @@ function InvalidInvite() {
 function AcceptInviteContent() {
   const router = useRouter();
   const token = useSearchParams()?.get('token') ?? '';
-  const invite = useInvite(token);
-  const { companyName } = useWorkspace();
+  const lookup = useTokenLookup(token, fetchInvite);
 
-  if (!invite) return <InvalidInvite />;
-  const { employee } = invite;
+  if (lookup.status === 'loading') return <Spinner size={28} />;
+  if (lookup.status === 'invalid') return <InvalidInvite />;
+  const employee = lookup.data;
 
   return (
-    <AuthCard title={`Join ${companyName}`} subtitle="Choose a password to finish setting up your account." logoOnMobileOnly>
+    <AuthCard title={`Join ${employee.companyName}`} subtitle="Choose a password to finish setting up your account." logoOnMobileOnly>
       <dl className={styles.identity}>
         <div>
           <dt>Name</dt>

@@ -2,14 +2,14 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { expireSessionIfNeeded, useHydrated, useSessionUser } from '@/store';
+import { refreshSession, useHydrated, useNeedsSetup, useSessionUser } from '@/store';
 import { AUTH_ROUTES, ROUTES } from '@/constants/navigation';
 import { FullPageLoader } from '@/components/ui/Spinner';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
 import styles from './AppShell.module.css';
 
-const SESSION_CHECK_MS = 60_000;
+const SESSION_CHECK_MS = 5 * 60_000;
 
 function isAuthPath(pathname: string): boolean {
   return AUTH_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
@@ -46,11 +46,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   const authRoute = isAuthPath(pathname);
   const allowSignedInOnAuthRoute = pathname === ROUTES.resetPassword || pathname === ROUTES.acceptInvite;
 
+  const needsSetup = useNeedsSetup();
+  const onSetupPage = pathname === ROUTES.setup;
+
   useEffect(() => {
     if (!hydrated) return;
-    expireSessionIfNeeded();
-    const timer = setInterval(expireSessionIfNeeded, SESSION_CHECK_MS);
-    const onVisible = () => document.visibilityState === 'visible' && expireSessionIfNeeded();
+    const check = () => void refreshSession();
+    const timer = setInterval(check, SESSION_CHECK_MS);
+    const onVisible = () => document.visibilityState === 'visible' && check();
     document.addEventListener('visibilitychange', onVisible);
     return () => {
       clearInterval(timer);
@@ -60,15 +63,23 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!hydrated) return;
-    if (!authRoute && !user) {
+    if (needsSetup) {
+      if (!onSetupPage) router.replace(ROUTES.setup);
+      return;
+    }
+    if (onSetupPage && !user) {
+      router.replace(ROUTES.login);
+    } else if (!authRoute && !user) {
       const next = pathname === ROUTES.home ? '' : `?next=${encodeURIComponent(pathname)}`;
       router.replace(`${ROUTES.login}${next}`);
     } else if (authRoute && user && !allowSignedInOnAuthRoute) {
       router.replace(safeNextPath());
     }
-  }, [hydrated, authRoute, user, pathname, router, allowSignedInOnAuthRoute]);
+  }, [hydrated, needsSetup, onSetupPage, authRoute, user, pathname, router, allowSignedInOnAuthRoute]);
 
   if (!hydrated) return <FullPageLoader />;
+  const redirectingForSetup = needsSetup ? !onSetupPage : onSetupPage && !user;
+  if (redirectingForSetup) return <FullPageLoader />;
 
   if (authRoute) {
     if (user && !allowSignedInOnAuthRoute) return <FullPageLoader />;

@@ -30,3 +30,19 @@ export function validatePasswordPair(values: PasswordPairValues): FieldErrors<Pa
         : undefined,
   };
 }
+
+export interface SetupValues extends PasswordPairValues {
+  companyName: string;
+  name: string;
+  email: string;
+}
+
+export function validateSetup(values: SetupValues): FieldErrors<SetupValues> {
+  const email = values.email.trim();
+  return {
+    companyName: values.companyName.trim() ? undefined : 'Enter your company name',
+    name: values.name.trim() ? undefined : 'Enter your full name',
+    email: !email ? 'Enter your work email' : isValidEmail(email) ? undefined : 'Enter a valid email address',
+    ...validatePasswordPair(values),
+  };
+}

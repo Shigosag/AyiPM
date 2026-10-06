@@ -11,7 +11,7 @@ import styles from './WorkspaceSection.module.css';
 const SECTION = SECTION_BY_ID.workspace;
 
 export function WorkspaceSection() {
-  const { values, errors, dirty, setField, reset, submit } = useWorkspaceForm();
+  const { values, errors, dirty, saving, setField, reset, submit } = useWorkspaceForm();
   const fieldProps = { values, errors, setField };
 
   return (
@@ -32,7 +32,7 @@ export function WorkspaceSection() {
             <Button variant="secondary" icon={RotateCcw} onClick={reset} disabled={!dirty}>
               Discard
             </Button>
-            <Button type="submit" icon={Save} disabled={!dirty}>
+            <Button type="submit" icon={Save} disabled={!dirty} loading={saving}>
               Save workspace
             </Button>
           </div>

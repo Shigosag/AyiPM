@@ -1,20 +1,11 @@
-import { createId, nowIso } from '@/lib/id';
-import { toDateKey } from '@/lib/date';
-import { isValidEmail } from '@/lib/validation';
+import { nowIso } from '@/lib/id';
+import { api } from '@/lib/api';
 import { ROLE_LABELS } from '@/constants/roles';
 import type { AccessLink, ActionResult, Employee, EmployeeInput, EmployeeStatus, EmployeeUpdate, UserRole } from '@/types';
 import { authorize, fail, getState, ok, setState } from '../appStore';
 import { logActivity } from './activity';
 import { notify } from './notifications';
-import { issueInvite } from './accessLinks';
-
-const SELF_EDITABLE_FIELDS: (keyof EmployeeUpdate)[] = ['name', 'email', 'phone', 'location', 'bio', 'avatar'];
-
-export function findEmployeeByEmail(email: string, employees: Employee[] = getState().employees): Employee | undefined {
-  const value = email.trim().toLowerCase();
-  if (!value) return undefined;
-  return employees.find((e) => e.email.toLowerCase() === value);
-}
+import { handleUnauthorized, upsertEmployee } from './session';
 
 export function generateEmployeeId(): string {
   const { employees, workspace } = getState();
@@ -27,50 +18,14 @@ export function generateEmployeeId(): string {
   return `${prefix}${String(max + 1).padStart(3, '0')}`;
 }
 
-export function validateEmployeeIdentity(email: string, employeeId: string | undefined, excludeId?: string): string | undefined {
-  const { employees } = getState();
-  if (!isValidEmail(email)) return 'Enter a valid email address.';
-  const normalizedEmail = email.trim().toLowerCase();
-  if (employees.some((e) => e.id !== excludeId && e.email.toLowerCase() === normalizedEmail)) {
-    return 'An account with this email address already exists.';
-  }
-  const badge = employeeId?.trim().toUpperCase();
-  if (badge && employees.some((e) => e.id !== excludeId && e.employeeId.toUpperCase() === badge)) {
-    return `Employee ID "${badge}" is already in use.`;
-  }
-  return undefined;
-}
-
-export function buildEmployee(input: EmployeeInput): Employee {
-  const timestamp = nowIso();
-  return {
-    id: createId('emp'),
-    employeeId: input.employeeId?.trim().toUpperCase() || generateEmployeeId(),
-    name: input.name.trim(),
-    email: input.email.trim().toLowerCase(),
-    department: input.department,
-    designation: input.designation.trim(),
-    role: input.role,
-    status: 'active',
-    joinDate: input.joinDate || toDateKey(),
-    avatar: input.avatar,
-    phone: input.phone?.trim() || undefined,
-    location: input.location?.trim() || undefined,
-    bio: input.bio?.trim() || undefined,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-  };
-}
-
-export function addEmployee(input: EmployeeInput): ActionResult<{ employee: Employee; invite: AccessLink }> {
+export async function addEmployee(input: EmployeeInput): Promise<ActionResult<{ employee: Employee; invite: AccessLink }>> {
   const auth = authorize('employees.manage');
   if (!auth.ok) return auth;
-  const error = validateEmployeeIdentity(input.email, input.employeeId);
-  if (error) return fail(error);
+  const result = handleUnauthorized(await api<{ employee: Employee; invite: AccessLink }>('POST', '/api/employees', input));
+  if (!result.ok) return result;
 
-  const employee = buildEmployee(input);
-  setState((s) => ({ employees: [...s.employees, employee] }));
-  const invite = issueInvite(employee.id, auth.data.id);
+  const { employee } = result.data;
+  upsertEmployee(employee);
   logActivity({
     actor: auth.data,
     action: 'Invited Employee',
@@ -79,67 +34,43 @@ export function addEmployee(input: EmployeeInput): ActionResult<{ employee: Empl
     entityName: employee.name,
     details: `${employee.designation} · ${employee.employeeId}`,
   });
-  return ok({ employee, invite });
+  return ok(result.data);
 }
 
-export function updateEmployee(id: string, update: EmployeeUpdate): ActionResult<Employee> {
+export async function updateEmployee(id: string, update: EmployeeUpdate): Promise<ActionResult<Employee>> {
   const auth = authorize();
   if (!auth.ok) return auth;
-  const actor = auth.data;
-  const isAdmin = actor.role === 'admin';
-  if (!isAdmin && actor.id !== id) return fail('You can only edit your own profile.');
+  const result = handleUnauthorized(await api<Employee>('PATCH', `/api/employees/${id}`, update));
+  if (!result.ok) return result;
 
-  const target = getState().employees.find((e) => e.id === id);
-  if (!target) return fail('Employee not found.');
-
-  const allowed = isAdmin
-    ? update
-    : (Object.fromEntries(Object.entries(update).filter(([key]) => SELF_EDITABLE_FIELDS.includes(key as keyof EmployeeUpdate))) as EmployeeUpdate);
-
-  if (allowed.email !== undefined || allowed.employeeId !== undefined) {
-    const error = validateEmployeeIdentity(allowed.email ?? target.email, allowed.employeeId, id);
-    if (error) return fail(error);
-  }
-  if (allowed.name !== undefined && !allowed.name.trim()) return fail('Name is required.');
-
-  const updated: Employee = {
-    ...target,
-    ...allowed,
-    email: (allowed.email ?? target.email).trim().toLowerCase(),
-    employeeId: (allowed.employeeId ?? target.employeeId).trim().toUpperCase(),
-    updatedAt: nowIso(),
-  };
-  setState((s) => ({ employees: s.employees.map((e) => (e.id === id ? updated : e)) }));
+  upsertEmployee(result.data);
   logActivity({
-    actor,
-    action: actor.id === id ? 'Updated Own Profile' : 'Updated Employee Profile',
+    actor: auth.data,
+    action: auth.data.id === id ? 'Updated Own Profile' : 'Updated Employee Profile',
     entityType: 'employee',
     entityId: id,
-    entityName: updated.name,
+    entityName: result.data.name,
   });
-  return ok(updated);
+  return ok(result.data);
 }
 
-function countActiveAdmins(excludeId: string): number {
-  return getState().employees.filter((e) => e.id !== excludeId && e.role === 'admin' && e.status === 'active').length;
-}
-
-export function setEmployeeRole(id: string, role: UserRole): ActionResult {
+export async function setEmployeeRole(id: string, role: UserRole): Promise<ActionResult> {
   const auth = authorize('employees.manage');
   if (!auth.ok) return auth;
-  const target = getState().employees.find((e) => e.id === id);
-  if (!target) return fail('Employee not found.');
-  if (target.role === role) return ok();
-  if (target.role === 'admin' && countActiveAdmins(id) === 0) return fail('The workspace needs at least one active admin.');
+  const previous = getState().employees.find((e) => e.id === id);
+  if (!previous) return fail('Employee not found.');
+  if (previous.role === role) return ok();
 
-  setState((s) => ({ employees: s.employees.map((e) => (e.id === id ? { ...e, role, updatedAt: nowIso() } : e)) }));
+  const result = handleUnauthorized(await api<Employee>('PUT', `/api/employees/${id}/role`, { role }));
+  if (!result.ok) return result;
+  upsertEmployee(result.data);
   logActivity({
     actor: auth.data,
     action: 'Updated Employee Role',
     entityType: 'employee',
     entityId: id,
-    entityName: target.name,
-    details: `${ROLE_LABELS[target.role]} → ${ROLE_LABELS[role]}`,
+    entityName: previous.name,
+    details: `${ROLE_LABELS[previous.role]} → ${ROLE_LABELS[role]}`,
   });
   notify([id], {
     title: 'Your role was updated',
@@ -151,26 +82,41 @@ export function setEmployeeRole(id: string, role: UserRole): ActionResult {
   return ok();
 }
 
-export function setEmployeeStatus(id: string, status: EmployeeStatus): ActionResult {
+export async function setEmployeeStatus(id: string, status: EmployeeStatus): Promise<ActionResult> {
   const auth = authorize('employees.manage');
   if (!auth.ok) return auth;
-  if (auth.data.id === id) return fail('You cannot change your own account status.');
-  const target = getState().employees.find((e) => e.id === id);
-  if (!target) return fail('Employee not found.');
-  if (target.status === status) return ok();
-  if (status === 'inactive' && target.role === 'admin' && countActiveAdmins(id) === 0) {
-    return fail('The workspace needs at least one active admin.');
-  }
-
-  setState((s) => ({ employees: s.employees.map((e) => (e.id === id ? { ...e, status, updatedAt: nowIso() } : e)) }));
+  const result = handleUnauthorized(await api<Employee>('PUT', `/api/employees/${id}/status`, { status }));
+  if (!result.ok) return result;
+  upsertEmployee(result.data);
   logActivity({
     actor: auth.data,
     action: status === 'active' ? 'Reactivated Employee' : 'Deactivated Employee',
     entityType: 'employee',
     entityId: id,
-    entityName: target.name,
+    entityName: result.data.name,
   });
   return ok();
+}
+
+export async function regenerateInvite(id: string): Promise<ActionResult<AccessLink>> {
+  const auth = authorize('employees.manage');
+  if (!auth.ok) return auth;
+  const result = handleUnauthorized(await api<AccessLink>('POST', `/api/employees/${id}/invite`));
+  if (!result.ok) return result;
+  const target = getState().employees.find((e) => e.id === id);
+  logActivity({ actor: auth.data, action: 'Issued Invitation Link', entityType: 'employee', entityId: id, entityName: target?.name ?? 'Employee' });
+  return ok(result.data);
+}
+
+export async function sendPasswordResetLink(id: string): Promise<ActionResult<AccessLink>> {
+  const auth = authorize('employees.manage');
+  if (!auth.ok) return auth;
+  const result = handleUnauthorized(await api<AccessLink>('POST', `/api/employees/${id}/reset-link`));
+  if (!result.ok) return result;
+  setState((s) => ({ employees: s.employees.map((e) => (e.id === id ? { ...e, passwordResetRequestedAt: undefined } : e)) }));
+  const target = getState().employees.find((e) => e.id === id);
+  logActivity({ actor: auth.data, action: 'Issued Password Reset Link', entityType: 'auth', entityId: id, entityName: target?.name ?? 'Employee' });
+  return ok(result.data);
 }
 
 export function setEmployeeProjects(employeeId: string, projectIds: string[]): ActionResult {

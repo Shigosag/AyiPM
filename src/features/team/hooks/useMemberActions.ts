@@ -21,7 +21,7 @@ export function useMemberActions() {
         tone: deactivate ? 'danger' : 'primary',
       });
       if (!confirmed) return;
-      const result = setEmployeeStatus(member.id, deactivate ? 'inactive' : 'active');
+      const result = await setEmployeeStatus(member.id, deactivate ? 'inactive' : 'active');
       if (result.ok) toast.success(`${member.name} was ${deactivate ? 'deactivated' : 'reactivated'}.`);
       else toast.error(result.error);
     },
@@ -29,9 +29,9 @@ export function useMemberActions() {
   );
 
   const changeRole = useCallback(
-    (member: Employee, role: UserRole) => {
+    async (member: Employee, role: UserRole) => {
       if (member.role === role) return;
-      const result = setEmployeeRole(member.id, role);
+      const result = await setEmployeeRole(member.id, role);
       if (result.ok) toast.success(`${member.name} is now ${ROLE_LABELS[role]}.`);
       else toast.error(result.error);
     },

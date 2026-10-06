@@ -1,7 +1,8 @@
 import { storage } from '@/lib/storage';
-import { DEFAULT_WORKSPACE, LEGACY_STORAGE_PREFIX, STORAGE_KEY, THEME_STORAGE_KEY } from '@/constants/defaults';
+import { LEGACY_STORAGE_KEYS, LEGACY_STORAGE_PREFIX, STORAGE_KEY, THEME_STORAGE_KEY } from '@/constants/defaults';
 import type { ThemeMode } from '@/types';
 import { appStore, getState, setState } from './appStore';
+import { refreshSession } from './actions/session';
 import { createInitialState, PERSISTED_KEYS, type AppState, type PersistedState } from './state';
 
 const SAVE_DELAY_MS = 250;
@@ -35,7 +36,6 @@ function applySnapshot(raw: string | null) {
   PERSISTED_KEYS.forEach((key) => {
     (next as Record<string, unknown>)[key] = saved[key] ?? base[key];
   });
-  next.workspace = { ...DEFAULT_WORKSPACE, ...(saved.workspace ?? {}) };
   lastSerialized = raw;
   setState(next);
 }
@@ -43,7 +43,7 @@ function applySnapshot(raw: string | null) {
 function removeLegacyKeys() {
   storage
     .keys()
-    .filter((key) => key.startsWith(LEGACY_STORAGE_PREFIX))
+    .filter((key) => key.startsWith(LEGACY_STORAGE_PREFIX) || LEGACY_STORAGE_KEYS.includes(key))
     .forEach((key) => storage.remove(key));
 }
 
@@ -76,7 +76,8 @@ export function startPersistence(): () => void {
 
   removeLegacyKeys();
   applySnapshot(storage.readRaw(STORAGE_KEY));
-  setState({ hydrated: true, theme: readStoredTheme() });
+  setState({ theme: readStoredTheme() });
+  void refreshSession().finally(() => setState({ hydrated: true }));
 
   let previous = getState();
   const unsubscribe = appStore.subscribe(() => {

@@ -104,7 +104,9 @@ The README describes the project structure. In practice:
 - **Where code goes.** Route files in `src/app` only render a feature view. Feature UI lives in `src/features/<feature>/components`, feature hooks in `hooks/`, and pure helpers in `utils.ts`. Anything used by more than one feature belongs in `src/components/ui`, `src/hooks` or `src/lib`.
 - **Reuse the UI kit.** Before writing a new button, modal, form field, table or empty state, check `src/components/ui`.
 - **State.** Read state with narrow selectors (`useAppStore(s => s.projects)`, `useEmployeesById()`). Change it only through the actions in `src/store/actions`. Never read or write `localStorage` from a component.
-- **Permissions.** Check permissions with `usePermission(...)` in the UI and `authorize(...)` in store actions. Hiding a button is not enough on its own.
+- **Server code.** Code that touches the database lives in `src/server` (it imports `server-only`, so it can never end up in the browser bundle). API routes in `src/app/api` stay thin: read the request, call a service in `src/server`, return the result. Never send password hashes or tokens to the client.
+- **Database changes.** Edit `prisma/schema.prisma`, then run `npm run db:migrate -- --name <short-description>` and commit the generated migration with your change.
+- **Permissions.** Check permissions with `usePermission(...)` in the UI and with `requireUser(permission)` in API routes. Store actions also call `authorize(...)`. Hiding a button is not enough on its own.
 - **Data.** Store ids, not copies. Resolve names and avatars through the id maps (`useEmployeesById`, `useProjectsById`).
 - **Styling.** Use a CSS module next to the component, and the tokens in `globals.css` (`var(--text-primary)`, `var(--border-subtle)`, the `--gray-*` scale). Avoid large inline style objects and hardcoded colours.
 - **Performance.** Memoise derived lists with `useMemo`, avoid `.find` or `.filter` inside loops over large lists, and keep per-second timers (`useNow`) inside small leaf components.

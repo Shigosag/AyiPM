@@ -5,8 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import { CheckCircle2, KeyRound, Link2Off, LogIn, LayoutDashboard, RotateCcw, ShieldCheck } from 'lucide-react';
 import { ButtonLink, Spinner } from '@/components/ui';
 import { ROUTES } from '@/constants/navigation';
-import { useSessionUser } from '@/store';
-import { useResetTokenOwnerName } from '../hooks/useResetTokenOwnerName';
+import { fetchPasswordReset, useSessionUser } from '@/store';
+import { useTokenLookup } from '../hooks/useTokenLookup';
 import { AuthCard } from './AuthCard';
 import { AuthFooter } from './AuthFooter';
 import { AuthStatus } from './AuthStatus';
@@ -53,7 +53,7 @@ function InvalidLink() {
           </ButtonLink>
         }
       >
-        <p>Reset links work once and expire 30 minutes after they are created.</p>
+        <p>Reset links work once and expire 30 minutes after they are created. Ask your workspace admin for a new one.</p>
       </AuthStatus>
     </AuthCard>
   );
@@ -61,11 +61,13 @@ function InvalidLink() {
 
 function ResetPasswordContent() {
   const token = useSearchParams()?.get('token') ?? '';
-  const ownerName = useResetTokenOwnerName(token);
+  const lookup = useTokenLookup(token, fetchPasswordReset);
   const [done, setDone] = useState(false);
 
   if (done) return <ResetComplete />;
-  if (!ownerName) return <InvalidLink />;
+  if (lookup.status === 'loading') return <ResetPasswordFallback />;
+  if (lookup.status === 'invalid') return <InvalidLink />;
+  const ownerName = lookup.data.name;
 
   return (
     <AuthCard

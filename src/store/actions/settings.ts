@@ -2,8 +2,10 @@ import { storage } from '@/lib/storage';
 import { applyTheme } from '@/lib/theme';
 import { DEFAULT_PREFERENCES, THEME_STORAGE_KEY } from '@/constants/defaults';
 import type { ActionResult, ThemeMode, UserPreferences, WorkspaceSettings } from '@/types';
-import { authorize, fail, ok, setState } from '../appStore';
+import { api } from '@/lib/api';
+import { authorize, ok, setState } from '../appStore';
 import { logActivity } from './activity';
+import { handleUnauthorized } from './session';
 
 export function setTheme(theme: ThemeMode): void {
   storage.writeRaw(THEME_STORAGE_KEY, theme);
@@ -41,24 +43,12 @@ export function resetPreferences(): ActionResult {
   return ok();
 }
 
-export function updateWorkspace(update: Partial<WorkspaceSettings>): ActionResult {
+export async function updateWorkspace(update: Partial<WorkspaceSettings>): Promise<ActionResult> {
   const auth = authorize('workspace.manage');
   if (!auth.ok) return auth;
-  if (update.companyName !== undefined && !update.companyName.trim()) return fail('Company name is required.');
-  if (update.gracePeriodMinutes !== undefined && (update.gracePeriodMinutes < 0 || update.gracePeriodMinutes > 180)) {
-    return fail('Grace period must be between 0 and 180 minutes.');
-  }
-  if (update.employeeIdPrefix !== undefined && !/^[A-Za-z]{1,5}$/.test(update.employeeIdPrefix)) {
-    return fail('Employee ID prefix must be 1–5 letters.');
-  }
-  setState((s) => ({
-    workspace: {
-      ...s.workspace,
-      ...update,
-      employeeIdPrefix: (update.employeeIdPrefix ?? s.workspace.employeeIdPrefix).toUpperCase(),
-      leaveAllowance: { ...s.workspace.leaveAllowance, ...update.leaveAllowance },
-    },
-  }));
+  const result = handleUnauthorized(await api<WorkspaceSettings>('PATCH', '/api/workspace', update));
+  if (!result.ok) return result;
+  setState({ workspace: result.data });
   logActivity({ actor: auth.data, action: 'Updated Workspace Settings', entityType: 'settings', entityName: 'Workspace' });
   return ok();
 }

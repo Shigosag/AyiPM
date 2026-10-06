@@ -21,8 +21,12 @@ export function AccessLinkModal({ member, onClose }: AccessLinkModalProps) {
   const [link, setLink] = useState<AccessLink | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const generate = () => {
-    const result = isInvite ? regenerateInvite(member.id) : sendPasswordResetLink(member.id);
+  const [generating, setGenerating] = useState(false);
+
+  const generate = async () => {
+    setGenerating(true);
+    const result = await (isInvite ? regenerateInvite(member.id) : sendPasswordResetLink(member.id));
+    setGenerating(false);
     if (!result.ok) {
       setError(result.error);
       return;
@@ -68,7 +72,7 @@ export function AccessLinkModal({ member, onClose }: AccessLinkModalProps) {
           <Button variant="secondary" onClick={onClose}>
             Cancel
           </Button>
-          <Button icon={isInvite ? Send : KeyRound} onClick={generate}>
+          <Button icon={isInvite ? Send : KeyRound} onClick={generate} loading={generating}>
             {isInvite ? 'Create invite link' : 'Create reset link'}
           </Button>
         </>

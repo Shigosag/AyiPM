@@ -1,10 +1,6 @@
 import type {
   ActivityLogItem,
   AttendanceRecord,
-  Credential,
-  PasswordResetToken,
-  InviteToken,
-  LoginAttempt,
   Employee,
   LeaveRequest,
   NotificationItem,
@@ -18,12 +14,6 @@ import type {
 import { DEFAULT_WORKSPACE } from '@/constants/defaults';
 
 export interface PersistedState {
-  session: Session | null;
-  employees: Employee[];
-  credentials: Record<string, Credential>;
-  passwordResets: PasswordResetToken[];
-  invites: InviteToken[];
-  loginAttempts: Record<string, LoginAttempt>;
   projects: Project[];
   tasks: Task[];
   attendance: AttendanceRecord[];
@@ -31,21 +21,21 @@ export interface PersistedState {
   activityLog: ActivityLogItem[];
   notifications: NotificationItem[];
   preferences: Record<string, UserPreferences>;
-  workspace: WorkspaceSettings;
 }
 
-export interface AppState extends PersistedState {
+export interface ServerState {
+  session: Session | null;
+  employees: Employee[];
+  workspace: WorkspaceSettings;
+  needsSetup: boolean;
+}
+
+export interface AppState extends PersistedState, ServerState {
   hydrated: boolean;
   theme: ThemeMode;
 }
 
 export const PERSISTED_KEYS: (keyof PersistedState)[] = [
-  'session',
-  'employees',
-  'credentials',
-  'passwordResets',
-  'invites',
-  'loginAttempts',
   'projects',
   'tasks',
   'attendance',
@@ -53,19 +43,16 @@ export const PERSISTED_KEYS: (keyof PersistedState)[] = [
   'activityLog',
   'notifications',
   'preferences',
-  'workspace',
 ];
 
 export function createInitialState(): AppState {
   return {
     hydrated: false,
     theme: 'light',
+    needsSetup: false,
     session: null,
     employees: [],
-    credentials: {},
-    passwordResets: [],
-    invites: [],
-    loginAttempts: {},
+    workspace: DEFAULT_WORKSPACE,
     projects: [],
     tasks: [],
     attendance: [],
@@ -73,6 +60,5 @@ export function createInitialState(): AppState {
     activityLog: [],
     notifications: [],
     preferences: {},
-    workspace: DEFAULT_WORKSPACE,
   };
 }

@@ -26,13 +26,17 @@ export function AddMemberModal({ departments, onClose }: AddMemberModalProps) {
   const [suggestedId] = useState(generateEmployeeId);
   const [created, setCreated] = useState<{ employee: Employee; invite: AccessLink } | null>(null);
 
-  const submit = (e: FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     const errors = validateMemberForm(form.values);
     form.setErrors(errors);
     if (hasErrors(errors)) return;
 
-    const result = addEmployee(toEmployeeInput(form.values));
+    setSubmitting(true);
+    const result = await addEmployee(toEmployeeInput(form.values));
+    setSubmitting(false);
     if (!result.ok) {
       form.setFormError(result.error);
       return;
@@ -70,7 +74,7 @@ export function AddMemberModal({ departments, onClose }: AddMemberModalProps) {
           <Button variant="secondary" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" form={formId} icon={Send}>
+          <Button type="submit" form={formId} icon={Send} loading={submitting}>
             Create invitation
           </Button>
         </>
