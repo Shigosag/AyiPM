@@ -4,7 +4,9 @@
 
 # AyiPM
 
-AyiPM is an internal tool for running a small engineering team. It keeps people, attendance, leave, projects and tasks in one place, so we can stop tracking who is in today, who is on leave and who is working on what across spreadsheets and chat threads.
+AyiPM is an open-source, self-hostable workspace for small teams. It keeps people, attendance, leave, projects and tasks in one place, so you can stop tracking who is in today, who is on leave and who is working on what across spreadsheets and chat threads.
+
+It started as an internal tool and is now developed in the open. Contributions of every size are welcome, from fixing a colour to building backend features.
 
 The app is built with Next.js 14 and TypeScript. Accounts, sign-in and workspace settings are stored in a database (SQLite locally, through Prisma) and served by the app's own API routes. Projects, tasks, attendance and leave are still kept in the browser while they are moved to the database one area at a time.
 
@@ -117,4 +119,16 @@ A few rules keep the code consistent:
 
 ## Contributing
 
-Work is tracked in GitHub issues, and every change goes through a pull request to `main`. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow, branch and commit naming, and the review checklist.
+Work is tracked in GitHub issues, and every change goes through a pull request to `main`. Issues are labelled by difficulty, so it's easy to find a good first one:
+
+- [Beginner issues](https://github.com/mahfoos/AyiPM/issues?q=is%3Aissue+is%3Aopen+no%3Aassignee+label%3A%22level%3A+beginner%22)
+- [Intermediate issues](https://github.com/mahfoos/AyiPM/issues?q=is%3Aissue+is%3Aopen+no%3Aassignee+label%3A%22level%3A+intermediate%22)
+- [Advanced issues](https://github.com/mahfoos/AyiPM/issues?q=is%3Aissue+is%3Aopen+no%3Aassignee+label%3A%22level%3A+advanced%22)
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to claim an issue, the branch and commit conventions, and the review checklist. Questions and ideas are welcome in [Discussions](https://github.com/mahfoos/AyiPM/discussions).
+
+Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md). To report a security problem, please follow [SECURITY.md](SECURITY.md) rather than opening a public issue.
+
+## License
+
+AyiPM is released under the [MIT License](LICENSE).
