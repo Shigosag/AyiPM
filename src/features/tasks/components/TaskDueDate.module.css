@@ -1,0 +1,31 @@
+.due {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.normal,
+.done {
+  color: var(--text-secondary);
+}
+
+.done {
+  opacity: 0.75;
+}
+
+.soon {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.overdue {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.hint {
+  font-weight: 500;
+}

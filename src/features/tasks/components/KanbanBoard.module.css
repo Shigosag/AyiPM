@@ -1,0 +1,28 @@
+.board {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(270px, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 2px;
+  padding-bottom: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .board {
+    grid-auto-columns: 85%;
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .board {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow-x: visible;
+    scroll-snap-type: none;
+  }
+}

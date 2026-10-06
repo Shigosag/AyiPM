@@ -1,0 +1,24 @@
+.clock {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  background: var(--bg-subtle);
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.clock svg {
+  color: var(--primary);
+}
+
+@media (max-width: 1200px) {
+  .clock {
+    display: none;
+  }
+}

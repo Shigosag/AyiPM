@@ -1,0 +1,85 @@
+'use client';
+
+import Link from 'next/link';
+import { useRef } from 'react';
+import { ChevronDown, LogOut, Monitor, Moon, Settings, Sun, UserCircle } from 'lucide-react';
+import { logout, setTheme, useCurrentUser, useTheme } from '@/store';
+import { useClickOutside } from '@/hooks/useClickOutside';
+import { useDisclosure } from '@/hooks/useDisclosure';
+import { ROUTES } from '@/constants/navigation';
+import { Avatar } from '@/components/ui/Avatar';
+import { RoleBadge } from '@/components/ui/Badge';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { useConfirm } from '@/components/feedback/ConfirmProvider';
+import type { ThemeMode } from '@/types';
+import styles from './ProfileMenu.module.css';
+
+const THEME_OPTIONS = [
+  { value: 'light' as ThemeMode, label: 'Light', icon: Sun },
+  { value: 'dark' as ThemeMode, label: 'Dark', icon: Moon },
+  { value: 'device' as ThemeMode, label: 'Auto', icon: Monitor },
+];
+
+export function ProfileMenu() {
+  const user = useCurrentUser();
+  const theme = useTheme();
+  const confirm = useConfirm();
+  const { isOpen, toggle, close } = useDisclosure();
+  const ref = useRef<HTMLDivElement>(null);
+  useClickOutside(ref, close, isOpen);
+
+  const handleLogout = async () => {
+    close();
+    const ok = await confirm({ title: 'Sign out?', message: 'You will need your Employee ID and password to sign back in.', confirmLabel: 'Sign out', tone: 'danger' });
+    if (ok) logout();
+  };
+
+  return (
+    <div ref={ref} className={styles.wrap}>
+      <button type="button" className={styles.trigger} onClick={toggle} aria-expanded={isOpen} aria-haspopup="menu">
+        <Avatar name={user.name} src={user.avatar} size={34} />
+        <span className={styles.identity}>
+          <span className={styles.name}>{user.name}</span>
+          <span className={styles.meta}>{user.employeeId}</span>
+        </span>
+        <ChevronDown size={14} className={styles.chevron} />
+      </button>
+
+      {isOpen && (
+        <div className={styles.panel} role="menu">
+          <div className={styles.header}>
+            <Avatar name={user.name} src={user.avatar} size={44} />
+            <div className={styles.headerText}>
+              <strong>{user.name}</strong>
+              <span>{user.email}</span>
+              <RoleBadge role={user.role} />
+            </div>
+          </div>
+
+          <div className={styles.section}>
+            <Link href={ROUTES.profile} className={styles.item} role="menuitem" onClick={close}>
+              <UserCircle size={16} />
+              My profile
+            </Link>
+            <Link href={ROUTES.settings} className={styles.item} role="menuitem" onClick={close}>
+              <Settings size={16} />
+              Settings
+            </Link>
+          </div>
+
+          <div className={styles.section}>
+            <span className={styles.sectionLabel}>Theme</span>
+            <SegmentedControl label="Theme" size="sm" options={THEME_OPTIONS} value={theme} onChange={setTheme} />
+          </div>
+
+          <div className={styles.section}>
+            <button type="button" className={`${styles.item} ${styles.danger}`} role="menuitem" onClick={handleLogout}>
+              <LogOut size={16} />
+              Sign out
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

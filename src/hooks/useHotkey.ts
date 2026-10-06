@@ -1,0 +1,17 @@
+import { useEffect, useRef } from 'react';
+
+export function useHotkey(key: string, handler: (event: KeyboardEvent) => void, options: { meta?: boolean } = {}): void {
+  const handlerRef = useRef(handler);
+  handlerRef.current = handler;
+  const { meta = false } = options;
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() !== key.toLowerCase()) return;
+      if (meta && !(event.metaKey || event.ctrlKey)) return;
+      handlerRef.current(event);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [key, meta]);
+}

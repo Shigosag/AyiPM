@@ -1,0 +1,32 @@
+.avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--bg-card);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.initials {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+}
+
+.group > * + * {
+  margin-left: -0.5rem;
+}
+
+.more {
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  font-weight: 700;
+}

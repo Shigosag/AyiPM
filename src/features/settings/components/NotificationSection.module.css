@@ -1,0 +1,15 @@
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  font-variant-numeric: tabular-nums;
+}

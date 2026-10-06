@@ -1,0 +1,9 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.panel {
+  min-height: 180px;
+}

@@ -1,0 +1,77 @@
+.viewport {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: min(400px, calc(100vw - 2rem));
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md);
+  background: var(--gray-900);
+  color: var(--gray-25);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  animation: toastIn 0.2s ease-out;
+}
+
+.icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.success .icon {
+  color: var(--gray-300);
+}
+
+.error .icon {
+  color: var(--gray-400);
+}
+
+.info .icon {
+  color: var(--gray-300);
+}
+
+.message {
+  flex: 1;
+}
+
+.close {
+  background: transparent;
+  border: none;
+  color: var(--gray-400);
+  cursor: pointer;
+  display: flex;
+  padding: 0.15rem;
+}
+
+.close:hover {
+  color: var(--gray-25);
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .viewport {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+  }
+}

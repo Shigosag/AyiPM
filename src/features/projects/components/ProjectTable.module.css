@@ -1,0 +1,28 @@
+.nameCell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.name {
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.name:hover {
+  color: var(--primary);
+}
+
+.sub {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.deadline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.8125rem;
+}

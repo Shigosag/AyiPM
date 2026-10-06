@@ -1,0 +1,22 @@
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.85rem;
+}
+
+.muted {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.actions {
+  display: inline-flex;
+  gap: 0.25rem;
+}

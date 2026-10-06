@@ -1,0 +1,10 @@
+.submit {
+  height: 46px;
+  font-size: 0.9375rem;
+}
+
+.submit:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+  transform: none;
+}

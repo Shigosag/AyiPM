@@ -1,0 +1,43 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.actor {
+  width: auto;
+  min-width: 180px;
+}
+
+.date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.date input {
+  width: auto;
+  min-width: 150px;
+}
+
+@media (max-width: 640px) {
+  .actor,
+  .date,
+  .date input {
+    width: 100%;
+  }
+
+  .date {
+    justify-content: space-between;
+  }
+}

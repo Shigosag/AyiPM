@@ -1,0 +1,7 @@
+.pagination {
+  padding: 0 1.5rem 1.25rem;
+}
+
+.pagination:empty {
+  display: none;
+}

@@ -1,0 +1,33 @@
+.identity {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  overflow: hidden;
+}
+
+.identity > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.85rem;
+}
+
+.identity > div + div {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.identity dt {
+  color: var(--text-secondary);
+}
+
+.identity dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: right;
+  word-break: break-all;
+}

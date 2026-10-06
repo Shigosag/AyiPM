@@ -1,17 +1,17 @@
 <p align="center">
-  <img src="public/logo.png" alt="AYITRIX Logo" width="180" />
+  <img src="public/logo.svg" alt="AyiPM logo" width="220" />
 </p>
 
-# AYITRIX PM (AyiPM) — Employee & Project Management System
+# AyiPM — Employee & Project Management System
 
 > **Enterprise Employee Directory, Punctuality & Leave Tracking, and Agile Project Delivery Suite**  
-> Designed for **AYITRIX** according to the 12-Week MVP Delivery Roadmap for high-performing engineering teams.
+> Designed according to the 12-Week MVP Delivery Roadmap for high-performing engineering teams.
 
 ---
 
 ## 🌟 Executive Summary
 
-**AYITRIX PM (AyiPM)** is an internal company management system engineered to replace fragile spreadsheets and disjointed chat-based workflows. Features a sleek, modern **Light Enterprise Design Theme** with electric blue & cyan brand accents, and centralizes six core operational modules into a unified, role-aware dashboard for **Administrators**, **Project Managers**, and **Employees**:
+**AyiPM** is an internal company management system engineered to replace fragile spreadsheets and disjointed chat-based workflows. Features a sleek, modern **Light Enterprise Design Theme** with electric blue & cyan brand accents, and centralizes six core operational modules into a unified, role-aware dashboard for **Administrators**, **Project Managers**, and **Employees**:
 
 1. **Authentication & Role-Based Access Control (RBAC)** — Three personas with differentiated UI and workflow privileges.
 2. **Employee Management** — Complete staff directory, department structures, designations, and soft deactivation.
@@ -33,7 +33,7 @@ In alignment with **Week 1: Technology Selection** of the project roadmap, the s
 | **Language** | **TypeScript (Strict Mode)** | End-to-end type safety across domain interfaces, reducing runtime edge-case bugs in calculation logic. |
 | **Styling & Design System** | **Modular Vanilla CSS** | Custom CSS design tokens, glassmorphism surfaces (`backdrop-filter`), slate/indigo corporate palette, zero CSS library lock-in. |
 | **Iconography** | **Lucide Icons** | Consistent visual language across workflows, navigation, and status badges. |
-| **State & Persistence** | **React Context + Web Storage** | Zero-latency optimistic UI updates with automatic browser persistence and realistic mock seed datasets. |
+| **State & Persistence** | **Selector store (`useSyncExternalStore`) + versioned Web Storage** | Components subscribe to exactly the slice they render, actions live outside React, and state is persisted with a debounced, versioned writer. No seed or demo data. |
 | **Target Database Schema** | **PostgreSQL (12 relational tables)** | Relational integrity with foreign keys, soft deletes (`deleted_at`), and immutable audit logging. |
 
 ---
@@ -120,15 +120,56 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+### First run
+The workspace starts empty — there is no seed or demo data.
+
+There is no self-registration. Sign-in follows the same model as tools like ClickUp and Jira:
+
+- **Invitations** — an Admin adds a person from **Team → Add member**. They get an Employee ID and an invitation link (valid 7 days), show as **Invited**, and choose their own password when they accept it at `/accept-invite`.
+- **Two-step login** — work email first, then password. "Keep me signed in" extends the session from 12 hours to 30 days; expired sessions are signed out automatically.
+- **Lockout** — 5 failed attempts within 15 minutes lock the account for 15 minutes (checked before the password), and the person is notified. Error messages never reveal whether an account exists.
+- **Can't log in?** — the request notifies the workspace admins, who send a one-time reset link (valid 30 minutes) from the member's profile. Until email delivery is connected, invitation and reset links are shown to the admin to share privately.
+
+> A brand-new workspace has no accounts, so the first Admin has to be provisioned by the backend once it is connected.
+
+> Data is stored in the browser (`localStorage`) until the backend API is connected. Passwords are hashed with PBKDF2 (Web Crypto), which requires `https://` or `localhost`.
+
 ---
 
 ## 💡 Key Highlights & Interactive Features
 
-- **Live Persona Switcher**: Use the dropdown in the top header to instantly switch between **Admin**, **Project Manager**, and **Employee** perspectives to see permissions, metrics, and navigation adjust in real time.
-- **Attendance Station**: Click **Check In** in the top navbar or the Attendance page. The system calculates working hours and checks punctuality (grace window until 09:15 AM).
-- **Leave Approval Sync**: When an Admin or PM approves a leave request, the employee's balance is automatically updated and an attendance record for that date is logged as **On Leave**.
-- **Interactive Kanban Board**: Reorder tasks across `To Do`, `In Progress`, `Review`, and `Done` columns, filter by project or priority, and inspect audit histories.
-- **Reset State**: Click the reload icon in the top navigation bar anytime to reset the local browser state back to the official seed data.
+- **Role-based access**: Admin, Project Manager and Employee permissions are defined once in `src/constants/roles.ts` and enforced in both the UI and the store actions.
+- **Attendance Station**: Check in/out from the navbar or the Attendance page. Working hours, late arrivals and half-days are derived from the workspace schedule (start time, grace period and half-day threshold are configurable in **Settings → Workspace**).
+- **Leave Approval Sync**: Approving a leave request marks every day in the range as **On Leave** in attendance; balances are derived from approved requests and the workspace allowance.
+- **Kanban Board**: Drag and drop tasks across `To Do`, `In Progress`, `Review` and `Completed`, reorder within a column, or switch to the filterable, sortable list view.
+- **Targeted notifications**: Notifications go to the people they concern (assignee, reviewers, requester) and respect each user's category preferences.
+
+---
+
+## 🗂️ Project Structure
+
+```text
+src/
+├── app/                 # Routes only — thin pages that render a feature view
+├── features/<feature>/  # Feature modules: components/, hooks/, utils.ts (+ CSS modules)
+├── components/
+│   ├── ui/              # Reusable design-system primitives (Button, Modal, Field, DataTable…)
+│   ├── layout/          # App shell, sidebar, navbar, route guarding
+│   └── feedback/        # Toasts and confirm dialogs
+├── store/               # App state: state shape, actions/ (one file per domain), selectors, hooks, persistence
+├── hooks/               # Generic React hooks (useNow, usePagination, useClickOutside…)
+├── lib/                 # Framework-free helpers (store engine, dates, formatting, validation, crypto)
+├── constants/           # Roles & permissions, status metadata, navigation, defaults
+└── types/               # Domain types, one file per domain
+```
+
+**Conventions**
+
+- Pages in `src/app` stay thin; UI lives in `src/features/<feature>/components`.
+- Read state with narrow selectors (`useAppStore(s => s.tasks)`, `useEmployeesById()`); mutate only through store actions, which validate input, check permissions and return an `ActionResult`.
+- Entities reference each other by id (tasks store `assigneeId`, not a copied name); resolve names through the id maps.
+- Styling uses CSS modules per component plus the tokens in `globals.css`; avoid large inline style objects.
+- Keep per-second timers (`useNow`) in small leaf components so they never re-render a whole page.
 
 ---
 
