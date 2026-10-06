@@ -112,6 +112,8 @@ export default function TeamManagementPage() {
           !query ||
           emp.name.toLowerCase().includes(query) ||
           emp.email.toLowerCase().includes(query) ||
+          (emp.employeeId?.toLowerCase().includes(query) ?? false) ||
+          emp.phone.toLowerCase().includes(query) ||
           emp.designation.toLowerCase().includes(query) ||
           emp.department.toLowerCase().includes(query) ||
           emp.location.toLowerCase().includes(query) ||
@@ -240,7 +242,7 @@ export default function TeamManagementPage() {
   };
 
   const hasActiveFilters =
-    searchQuery !== '' ||
+    searchQuery.trim() !== '' ||
     selectedDept !== 'all' ||
     selectedRole !== 'all' ||
     selectedStatus !== 'all' ||
@@ -478,7 +480,7 @@ export default function TeamManagementPage() {
               <input
                 type="text"
                 id="member-search-input"
-                placeholder="Search member by name, email, designation, or role..."
+                placeholder="Search by name, email, employee ID, phone, designation, or role..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -519,7 +521,7 @@ export default function TeamManagementPage() {
             <select
               id="filter-role"
               value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value as any)}
+              onChange={(e) => setSelectedRole(e.target.value as 'all' | UserRole)}
               className="form-select"
               style={{ width: 'auto', padding: '0.45rem 0.75rem', fontSize: '0.8125rem' }}
             >
@@ -533,7 +535,7 @@ export default function TeamManagementPage() {
             <select
               id="filter-status"
               value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value as any)}
+              onChange={(e) => setSelectedStatus(e.target.value as 'all' | 'active' | 'inactive')}
               className="form-select"
               style={{ width: 'auto', padding: '0.45rem 0.75rem', fontSize: '0.8125rem' }}
             >
@@ -565,7 +567,9 @@ export default function TeamManagementPage() {
               <select
                 id="sort-members"
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) =>
+                  setSortBy(e.target.value as 'name-asc' | 'name-desc' | 'role' | 'dept' | 'joined-desc')
+                }
                 className="form-select"
                 style={{ width: 'auto', padding: '0.45rem 0.75rem', fontSize: '0.8125rem' }}
               >
@@ -1037,8 +1041,13 @@ export default function TeamManagementPage() {
 
       {/* Data Table View */}
       {viewMode === 'table' && filteredEmployees.length > 0 && (
-        <div className="table-wrapper">
-          <table className="custom-table">
+        <div
+          className="table-wrapper team-member-table-wrapper"
+          role="region"
+          aria-label="Team member directory"
+          tabIndex={0}
+        >
+          <table className="custom-table team-member-table">
             <thead>
               <tr>
                 <th>Member</th>
