@@ -34,8 +34,10 @@ export function useWorkspaceForm() {
     setErrors({});
   }, [baseline]);
 
+  const [saving, setSaving] = useState(false);
+
   const submit = useCallback(
-    (event: FormEvent) => {
+    async (event: FormEvent) => {
       event.preventDefault();
       const nextErrors = validateWorkspaceForm(values);
       setErrors(nextErrors);
@@ -43,7 +45,9 @@ export function useWorkspaceForm() {
         toast.error('Fix the highlighted workspace fields before saving.');
         return;
       }
-      const result = updateWorkspace(toWorkspaceSettings(values));
+      setSaving(true);
+      const result = await updateWorkspace(toWorkspaceSettings(values));
+      setSaving(false);
       if (result.ok) toast.success('Workspace settings saved.');
       else toast.error(result.error);
     },
@@ -52,5 +56,5 @@ export function useWorkspaceForm() {
 
   const dirty = useMemo(() => !isSameWorkspaceForm(values, baseline), [values, baseline]);
 
-  return { values, errors, dirty, setField, reset, submit };
+  return { values, errors, dirty, saving, setField, reset, submit };
 }

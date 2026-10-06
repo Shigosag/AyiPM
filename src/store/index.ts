@@ -11,3 +11,4 @@ export * from './actions/tasks';
 export * from './actions/notifications';
 export * from './actions/settings';
 export { logActivity } from './actions/activity';
+export { refreshSession } from './actions/session';

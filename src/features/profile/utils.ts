@@ -60,9 +60,9 @@ export function toEmployeeUpdate(values: ProfileFormValues): EmployeeUpdate {
   return {
     name: values.name.trim(),
     email: values.email.trim(),
-    phone: values.phone.trim() || undefined,
-    location: values.location.trim() || undefined,
-    bio: values.bio.trim() || undefined,
+    phone: values.phone.trim(),
+    location: values.location.trim(),
+    bio: values.bio.trim(),
   };
 }
 

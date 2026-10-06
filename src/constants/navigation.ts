@@ -29,6 +29,7 @@ export const ROUTES = {
   forgotPassword: '/forgot-password',
   resetPassword: '/reset-password',
   acceptInvite: '/accept-invite',
+  setup: '/setup',
 } as const;
 
 export type NavBadgeKey = 'activeEmployees' | 'attendanceToday' | 'pendingLeaves' | 'activeProjects' | 'openTasks' | 'unreadNotifications';
@@ -57,4 +58,4 @@ export const ACCOUNT_NAV_ITEMS: NavItem[] = [
   { label: 'Settings', href: ROUTES.settings, icon: Settings },
 ];
 
-export const AUTH_ROUTES: string[] = [ROUTES.login, ROUTES.forgotPassword, ROUTES.resetPassword, ROUTES.acceptInvite];
+export const AUTH_ROUTES: string[] = [ROUTES.login, ROUTES.forgotPassword, ROUTES.resetPassword, ROUTES.acceptInvite, ROUTES.setup];

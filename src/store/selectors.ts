@@ -18,9 +18,7 @@ import { isSessionActive } from './session';
 export const selectCurrentUser = (s: AppState): Employee | undefined =>
   isSessionActive(s.session) ? s.employees.find((e) => e.id === s.session?.userId && e.status === 'active') : undefined;
 
-export const selectPendingInviteIds = memoizeOne(
-  (employees: Employee[], credentials: AppState['credentials']) => new Set(employees.filter((e) => !credentials[e.id]).map((e) => e.id))
-);
+export const selectPendingInviteIds = memoizeOne((employees: Employee[]) => new Set(employees.filter((e) => e.invited).map((e) => e.id)));
 
 export const selectEmployeesById = memoizeOne(
   (employees: Employee[]) => new Map(employees.map((e) => [e.id, e]))

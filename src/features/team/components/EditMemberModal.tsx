@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, type FormEvent } from 'react';
+import { useId, useState, type FormEvent } from 'react';
 import { Save } from 'lucide-react';
 import { setEmployeeRole, updateEmployee, useCurrentUser } from '@/store';
 import { Button, FormError, Modal } from '@/components/ui';
@@ -25,28 +25,33 @@ export function EditMemberModal({ member, departments, onClose }: EditMemberModa
   const isSelf = currentUser.id === member.id;
   const form = useMemberForm(() => memberFormFromEmployee(member));
 
-  const submit = (e: FormEvent) => {
+  const [saving, setSaving] = useState(false);
+
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     const errors = validateMemberForm(form.values, true);
     form.setErrors(errors);
     if (hasErrors(errors)) return;
 
     const { role, ...fields } = form.values;
+    setSaving(true);
     if (!isSelf && role !== member.role) {
-      const roleResult = setEmployeeRole(member.id, role);
+      const roleResult = await setEmployeeRole(member.id, role);
       if (!roleResult.ok) {
+        setSaving(false);
         form.setFormError(roleResult.error);
         return;
       }
     }
-    const result = updateEmployee(member.id, {
+    const result = await updateEmployee(member.id, {
       ...fields,
-      phone: fields.phone.trim() || undefined,
-      location: fields.location.trim() || undefined,
+      phone: fields.phone.trim(),
+      location: fields.location.trim(),
       designation: fields.designation.trim(),
       name: fields.name.trim(),
       joinDate: fields.joinDate || member.joinDate,
     });
+    setSaving(false);
     if (!result.ok) {
       form.setFormError(result.error);
       return;
@@ -67,7 +72,7 @@ export function EditMemberModal({ member, departments, onClose }: EditMemberModa
           <Button variant="secondary" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" form={formId} icon={Save}>
+          <Button type="submit" form={formId} icon={Save} loading={saving}>
             Save changes
           </Button>
         </>

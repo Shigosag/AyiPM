@@ -7,3 +7,4 @@ export * from './task';
 export * from './activity';
 export * from './notification';
 export * from './settings';
+export * from './api';

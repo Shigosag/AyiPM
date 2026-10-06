@@ -25,7 +25,7 @@ export function useAvatarUpload(userId: string) {
       setProcessing(true);
       try {
         const avatar = await resizeImageToDataUrl(file);
-        const result = updateEmployee(userId, { avatar });
+        const result = await updateEmployee(userId, { avatar });
         if (result.ok) toast.success('Profile photo updated.');
         else toast.error(result.error);
       } catch (err) {
@@ -45,7 +45,7 @@ export function useAvatarUpload(userId: string) {
       tone: 'danger',
     });
     if (!confirmed) return;
-    const result = updateEmployee(userId, { avatar: undefined });
+    const result = await updateEmployee(userId, { avatar: '' });
     if (result.ok) toast.success('Profile photo removed.');
     else toast.error(result.error);
   }, [userId, confirm, toast]);

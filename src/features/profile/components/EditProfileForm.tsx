@@ -10,7 +10,7 @@ import { BIO_MAX_LENGTH } from '../utils';
 import styles from './EditProfileForm.module.css';
 
 export function EditProfileForm({ user }: { user: Employee }) {
-  const { values, errors, dirty, setField, reset, submit } = useProfileForm(user);
+  const { values, errors, dirty, saving, setField, reset, submit } = useProfileForm(user);
   const id = useId();
   const bioLength = values.bio.length;
 
@@ -97,7 +97,7 @@ export function EditProfileForm({ user }: { user: Employee }) {
             <Button variant="secondary" icon={RotateCcw} onClick={reset} disabled={!dirty}>
               Reset
             </Button>
-            <Button type="submit" icon={Save} disabled={!dirty}>
+            <Button type="submit" icon={Save} disabled={!dirty} loading={saving}>
               Save changes
             </Button>
           </div>

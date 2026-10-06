@@ -6,7 +6,7 @@
 
 AyiPM is an internal tool for running a small engineering team. It keeps people, attendance, leave, projects and tasks in one place, so we can stop tracking who is in today, who is on leave and who is working on what across spreadsheets and chat threads.
 
-The app is a Next.js 14 frontend written in TypeScript. There is no backend yet: data lives in the browser's `localStorage` behind a store layer, so it can be swapped for an API without rewriting the pages.
+The app is built with Next.js 14 and TypeScript. Accounts, sign-in and workspace settings are stored in a database (SQLite locally, through Prisma) and served by the app's own API routes. Projects, tasks, attendance and leave are still kept in the browser while they are moved to the database one area at a time.
 
 ## Features
 
@@ -43,10 +43,12 @@ You need Node.js 18.17 or newer.
 git clone https://github.com/mahfoos/AyiPM.git
 cd AyiPM
 npm install
+cp .env.example .env
+npm run db:migrate
 npm run dev
 ```
 
-Then open http://localhost:3000.
+Then open http://localhost:3000. On a new database you are taken to **/setup**, where you create the workspace and its owner account. The setup page locks itself as soon as that first account exists.
 
 | Command | What it does |
 | --- | --- |
@@ -54,35 +56,46 @@ Then open http://localhost:3000.
 | `npm run build` | Create a production build (also type-checks) |
 | `npm run start` | Serve the production build |
 | `npx tsc --noEmit` | Type-check without building |
+| `npm run db:migrate` | Apply database migrations (and create the database the first time) |
+| `npm run db:studio` | Browse and edit the database in Prisma Studio |
+| `npm run db:reset` | Delete all data and re-run every migration |
 
 `npm run lint` is defined, but ESLint has not been configured yet, so it will ask to set it up the first time.
 
 ## Accounts and sign-in
 
-There is no public sign-up. Accounts work the way they do in tools like ClickUp or Jira:
+There is no public sign-up. The only account anyone creates themselves is the workspace owner, once, on `/setup`. After that, accounts work the way they do in tools like ClickUp or Jira:
 
 1. An admin adds a person from **Team → Add member**. AyiPM creates an Employee ID and an invitation link that is valid for 7 days. The person shows as **Invited** until they accept it.
 2. The person opens the link (`/accept-invite`), chooses a password and lands in the workspace.
 3. After that, they sign in with their work email and password. "Keep me signed in" extends the session from 12 hours to 30 days.
 
-If someone can't sign in, they use **Can't log in?** on the login page. This notifies the workspace admins, who can send a one-time reset link (valid for 30 minutes) from that person's profile.
+If someone can't sign in, they use **Can't log in?** on the login page. Their profile on the Team page is then marked **Reset requested**, and an admin sends them a one-time reset link (valid for 30 minutes) from that profile.
 
 After 5 failed attempts within 15 minutes, an account is locked for 15 minutes. Login errors never say whether an account exists.
 
-Passwords are hashed in the browser with PBKDF2 through the Web Crypto API. This only works on `https://` or `localhost`.
+Passwords are hashed on the server with scrypt. Sessions are random tokens kept in an `httpOnly` cookie and stored hashed in the database, so signing out or deactivating someone ends their session everywhere.
+
+## Database
+
+Local development uses SQLite, stored in `prisma/dev.db`. The schema lives in `prisma/schema.prisma`, and migrations are in `prisma/migrations`.
+
+To use Postgres instead, change `provider` to `"postgresql"` in `prisma/schema.prisma`, set `DATABASE_URL` in `.env` to your Postgres connection string, and run `npm run db:migrate`.
 
 ## Known limitations
 
-- **No backend yet.** All data is stored in the browser, so each browser has its own separate workspace.
-- **No first account.** A fresh workspace has no accounts and there is no sign-up, so the first admin has to be created by the backend once it exists.
+- **Partly local data.** Projects, tasks, attendance, leave, notifications and the activity log are still stored in the browser, so they are not yet shared between devices.
 - **No email delivery.** Invitation and reset links are shown to the admin, who shares them manually.
-- **No single sign-on.** Google and Microsoft sign-in need a server and aren't available yet.
+- **No single sign-on.** Google and Microsoft sign-in are not available yet.
 
 ## Project structure
 
 ```text
+prisma/                  Database schema and migrations
 src/
-├── app/                 Route files only; each page renders one feature view
+├── app/                 Route files; each page renders one feature view
+│   └── api/             API routes (setup, auth, employees, workspace)
+├── server/              Server-only code: database client, auth, sessions, services
 ├── features/<feature>/  Feature code: components/, hooks/, utils.ts, CSS modules
 ├── components/
 │   ├── ui/              Shared building blocks (Button, Modal, Field, DataTable, ...)

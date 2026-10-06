@@ -1,7 +1,8 @@
 import type { UserPreferences, WorkspaceSettings } from '@/types';
 
-export const STORAGE_KEY = 'ayipm:v2:state';
+export const STORAGE_KEY = 'ayipm:v3:state';
 export const THEME_STORAGE_KEY = 'ayipm:v2:theme';
+export const LEGACY_STORAGE_KEYS = ['ayipm:v2:state'];
 export const LEGACY_STORAGE_PREFIX = 'ayipm_';
 
 export const MAX_ACTIVITY_ITEMS = 500;

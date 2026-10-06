@@ -58,7 +58,10 @@ export function useEmployee(id: string | undefined): Employee | undefined {
   return useAppStore((s) => (id ? selectEmployeesById(s.employees).get(id) : undefined));
 }
 
-export const useIsPendingInvite = (employeeId: string) => useAppStore((s) => !s.credentials[employeeId]);
+export const useIsPendingInvite = (employeeId: string) =>
+  useAppStore((s) => selectEmployeesById(s.employees).get(employeeId)?.invited ?? false);
+
+export const useNeedsSetup = () => useAppStore((s) => s.needsSetup);
 
 export const useMyNotifications = () => useAppStore(selectMyNotifications);
 export const useUnreadCount = () => useAppStore(selectUnreadCount);
