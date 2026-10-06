@@ -489,6 +489,15 @@ html, body {
   box-shadow: var(--shadow-sm);
 }
 
+.team-member-table-wrapper:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.team-member-table {
+  min-width: 960px;
+}
+
 .custom-table {
   width: 100%;
   border-collapse: collapse;
@@ -1197,4 +1206,3 @@ html, body {
   background: var(--bg-elevated);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
-
