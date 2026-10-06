@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question
+    url: https://github.com/mahfoos/AyiPM/discussions
+    about: Questions, ideas and help with setting up AyiPM.
+  - name: Report a security vulnerability
+    url: https://github.com/mahfoos/AyiPM/security/advisories/new
+    about: Please report security problems privately, not in a public issue.
